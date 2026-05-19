@@ -93,4 +93,48 @@ Lo que propongo es solucionarlo:
 
 ### WhatsApp
 "Hola, os he visto en Google Maps. La mayoría de hookahs
-en Madrid no aparecen bien online y
+en Madrid no aparecen bien online y pierden clientes por eso.
+¿Tenéis 10 minutos esta semana para que os explique
+lo que haría por vosotros?"
+
+---
+
+## Academias
+
+### Llamada
+"Hola, ¿hablo con la dirección de la academia?
+
+Soy [tu nombre], ayudo a academias de Madrid a conseguir
+más alumnos a través de su web y Google. He visto
+vuestra academia y creo que hay margen de mejora claro
+en cómo aparecéis online. ¿Tienen cinco minutos esta
+semana para que les enseñe exactamente lo que cambiaría?"
+
+### Email
+Asunto: [Nombre academia] — así consiguen más alumnos nuevos por Google
+
+Hola,
+
+He visto vuestra academia en Google Maps y he revisado
+vuestra web.
+
+La mayoría de academias en Madrid pierden alumnos nuevos
+porque no aparecen en Google cuando alguien busca
+[tipo de curso] en [barrio]. Ese alumno acaba yendo
+a la competencia.
+
+Lo que propongo:
+— Web clara con cursos, horarios y formulario de contacto
+— SEO local para aparecer en búsquedas de vuestro barrio
+— Precio cerrado, entrega en 2 semanas
+
+¿Hablamos esta semana?
+
+[Tu nombre]
+[Tu web o demo]
+[Teléfono]
+
+### WhatsApp
+"Hola, he visto vuestra academia en Google. Creo que hay
+algo concreto que os está impidiendo conseguir más alumnos
+online. ¿Os puedo explicar en 10 minutos lo que haría?"
