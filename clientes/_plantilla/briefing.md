@@ -15,27 +15,26 @@
 - Fecha primer contacto: 
 
 ## Situación actual
-- ¿Tienen web? Sí / No / Desactualizada
-- ¿Tienen Google My Business? Sí / No / Mal configurado
+- ¿Tienen web? 
+- ¿Tienen Google My Business? 
 - ¿Tienen redes sociales activas? 
 - ¿Cómo consiguen clientes ahora mismo?
 
 ## Problemas detectados
-(Lo que tú ves antes de la reunión)
 - 
 - 
 - 
 
 ## Lo que necesitan (después del discovery)
-- Problema real: 
-- Lo que piden: 
-- Lo que realmente necesitan: 
+- Problema real: PENDIENTE
+- Lo que piden: PENDIENTE
+- Lo que realmente necesitan: PENDIENTE
 
 ## Propuesta
-- Servicios incluidos: 
-- Precio acordado: 
-- Fecha de entrega: 
-- Mantenimiento mensual: Sí / No — precio:
+- Servicios incluidos: PENDIENTE
+- Precio acordado: PENDIENTE
+- Fecha de entrega: PENDIENTE
+- Mantenimiento mensual: PENDIENTE
 
 ## Estado del proyecto
 - [ ] Primer contacto
@@ -47,4 +46,3 @@
 - [ ] Mantenimiento activo
 
 ## Notas y contexto extra
-(Todo lo que no cabe arriba pero es relevante)
