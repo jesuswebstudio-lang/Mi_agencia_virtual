@@ -24,7 +24,7 @@ lo que ofrecéis acaban contactando con la competencia."]
 **Precio: [X]€ + IVA — pago 50% inicio / 50% entrega**
 
 Incluye:
-- [ ] [entregable 1]
+- [x] [entregable 1]
 - [ ] [entregable 2]
 - [ ] [entregable 3]
 
