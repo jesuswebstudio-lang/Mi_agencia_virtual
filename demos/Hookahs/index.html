@@ -3,599 +3,496 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Skinny Club | Shisha Lounge & Cocktail Bar en Parla</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<title>Skinny Club | Shisha Lounge & Cocktail Bar — Parla</title>
+<meta name="description" content="El mejor ambiente de Parla. Cachimbas premium, cócteles increíbles y batidos épicos. Abrimos a las 16:00 todos los días.">
 <style>
   :root {
-    --bg-dark: #09090b;       /* Fondo negro principal */
-    --bg-card: #18181b;       /* Fondo gris oscuro para tarjetas */
-    --neon-purple: #a855f7;   /* Morado neón */
-    --neon-pink: #ec4899;     /* Rosa neón */
-    --text-main: #f4f4f5;     /* Texto blanco/gris claro */
-    --text-muted: #a1a1aa;    /* Texto gris para descripciones */
-    --border-color: #27272a;  /* Bordes sutiles */
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --dark: #0a0a0a;
+    --dark2: #111111;
+    --dark3: #1a1a1a;
+    --smoke: rgba(201,168,76,0.08);
+    --text: #f0ece4;
+    --text-muted: rgba(240,236,228,0.55);
   }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg-dark); color: var(--text-main); overflow-x: hidden; }
-
-  /* BANNER DEMO */
-  .demo-banner {
-    background: linear-gradient(90deg, #3b0764, #831843);
-    color: #fff;
-    text-align: center;
-    padding: 10px 20px;
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: 0.3px;
-    position: relative;
-    z-index: 999;
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    overflow-x: hidden;
   }
-  .demo-banner span { color: #f9a8d4; font-weight: bold; }
 
   /* NAV */
   nav {
-    background: rgba(9, 9, 11, 0.9);
-    backdrop-filter: blur(10px);
-    padding: 0 6%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 70px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    border-bottom: 1px solid var(--border-color);
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 1.2rem 2rem;
+    display: flex; justify-content: space-between; align-items: center;
+    background: linear-gradient(to bottom, rgba(10,10,10,0.95), transparent);
+    transition: background 0.4s;
   }
-  .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; color: #fff; letter-spacing: 2px; text-transform: uppercase; }
-  .logo span { color: var(--neon-purple); }
-  .nav-links { display: flex; gap: 28px; }
-  .nav-links a { color: var(--text-main); text-decoration: none; font-size: 14px; font-weight: 500; transition: color .2s; }
-  .nav-links a:hover { color: var(--neon-pink); }
+  nav.scrolled { background: rgba(10,10,10,0.97); }
+  .nav-logo {
+    font-size: 1.1rem; font-weight: 700; letter-spacing: 0.25em;
+    color: var(--gold); text-transform: uppercase; text-decoration: none;
+  }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a {
+    color: var(--text-muted); font-size: 0.8rem; letter-spacing: 0.12em;
+    text-transform: uppercase; text-decoration: none;
+    transition: color 0.3s;
+  }
+  .nav-links a:hover { color: var(--gold); }
   .nav-cta {
-    background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
-    color: #fff;
-    border: none;
-    padding: 10px 24px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    transition: opacity .2s, transform .2s;
+    background: transparent; border: 1px solid var(--gold);
+    color: var(--gold); padding: 0.5rem 1.3rem;
+    font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase;
+    cursor: pointer; text-decoration: none;
+    transition: all 0.3s;
   }
-  .nav-cta:hover { opacity: 0.9; transform: scale(1.02); }
-
-  /* URGENCY BAR */
-  .urgency-bar {
-    background: var(--bg-card);
-    border-bottom: 1px solid var(--border-color);
-    padding: 12px 6%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-    flex-wrap: wrap;
-  }
-  .urgency-bar p { color: var(--text-main); font-size: 14px; font-weight: 500; }
-  .urgency-tel {
-    background: transparent;
-    color: var(--neon-pink);
-    border: 1px solid var(--neon-pink);
-    padding: 6px 18px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all .2s;
-  }
-  .urgency-tel:hover { background: var(--neon-pink); color: #fff; }
+  .nav-cta:hover { background: var(--gold); color: var(--dark); }
+  .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+  .hamburger span { width: 24px; height: 1px; background: var(--text); display: block; transition: all 0.3s; }
 
   /* HERO */
   .hero {
-    padding: 80px 6% 90px;
-    display: grid;
-    grid-template-columns: 1.1fr 0.9fr;
-    gap: 60px;
-    align-items: center;
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    text-align: center;
     position: relative;
+    overflow: hidden;
+    padding: 0 1.5rem;
   }
-  .hero::before {
-    content: '';
+  .hero-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(201,168,76,0.07) 0%, transparent 70%),
+                radial-gradient(ellipse 60% 40% at 20% 80%, rgba(201,168,76,0.04) 0%, transparent 60%);
+  }
+  .smoke-particle {
     position: absolute;
-    top: -150px; left: -150px;
-    width: 600px; height: 600px;
-    background: radial-gradient(circle, rgba(168,85,247,0.15) 0%, transparent 60%);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 70%);
+    animation: smokeDrift linear infinite;
     pointer-events: none;
   }
+  @keyframes smokeDrift {
+    0% { transform: translateY(0) scale(1); opacity: 0; }
+    20% { opacity: 1; }
+    80% { opacity: 0.4; }
+    100% { transform: translateY(-120vh) scale(2.5); opacity: 0; }
+  }
   .hero-badge {
-    display: inline-block;
-    background: rgba(168,85,247,0.1);
-    border: 1px solid rgba(168,85,247,0.3);
-    color: var(--neon-purple);
-    font-size: 12px;
-    font-weight: 600;
-    padding: 6px 16px;
-    border-radius: 20px;
-    margin-bottom: 22px;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    border: 1px solid rgba(201,168,76,0.3);
+    padding: 0.35rem 1rem; border-radius: 100px;
+    font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 2rem;
+    animation: fadeUp 0.8s ease both;
   }
+  .badge-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--gold); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
   .hero h1 {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 70px;
-    line-height: 1.05;
-    color: #fff;
-    margin-bottom: 22px;
-    text-transform: uppercase;
+    font-size: clamp(3.5rem, 12vw, 9rem);
+    font-weight: 800; letter-spacing: -0.02em;
+    line-height: 0.9; text-transform: uppercase;
+    animation: fadeUp 0.8s ease 0.1s both;
   }
-  .hero h1 span { 
-    background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+  .hero h1 span { color: var(--gold); }
+  .hero-sub {
+    font-size: clamp(0.85rem, 2vw, 1rem);
+    color: var(--text-muted); letter-spacing: 0.2em; text-transform: uppercase;
+    margin: 1.5rem 0 2.5rem;
+    animation: fadeUp 0.8s ease 0.2s both;
   }
-  .hero p {
-    color: var(--text-muted);
-    font-size: 17px;
-    line-height: 1.75;
-    margin-bottom: 38px;
-    max-width: 480px;
+  .hero-actions {
+    display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
+    animation: fadeUp 0.8s ease 0.3s both;
   }
-  .hero-btns { display: flex; gap: 14px; flex-wrap: wrap; }
   .btn-primary {
-    background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
-    color: #fff;
-    padding: 14px 32px;
-    border-radius: 8px;
-    font-size: 15px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: transform .15s, box-shadow .2s;
+    background: var(--gold); color: var(--dark);
+    padding: 0.9rem 2.2rem; font-size: 0.8rem; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    text-decoration: none; border: none; cursor: pointer;
+    transition: all 0.3s; position: relative; overflow: hidden;
   }
-  .btn-primary:hover { 
-    transform: translateY(-2px); 
-    box-shadow: 0 10px 25px rgba(236,72,153,0.3); 
+  .btn-primary::after {
+    content: ''; position: absolute; inset: 0;
+    background: rgba(255,255,255,0.15);
+    transform: translateX(-100%); transition: transform 0.3s;
   }
+  .btn-primary:hover::after { transform: translateX(0); }
   .btn-secondary {
-    background: transparent;
-    color: #fff;
-    border: 1px solid var(--border-color);
-    padding: 14px 32px;
-    border-radius: 8px;
-    font-size: 15px;
-    font-weight: 500;
-    text-decoration: none;
-    transition: background .2s, border-color .2s;
+    background: transparent; color: var(--text);
+    padding: 0.9rem 2.2rem; font-size: 0.8rem; font-weight: 400;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    text-decoration: none; border: 1px solid rgba(240,236,228,0.2);
+    cursor: pointer; transition: all 0.3s;
   }
-  .btn-secondary:hover { background: var(--bg-card); border-color: var(--text-muted); }
-  
-  .hero-stats { display: flex; gap: 40px; margin-top: 50px; }
-  .stat-num { font-family: 'Barlow Condensed', sans-serif; font-size: 44px; color: #fff; line-height: 1; }
-  .stat-num span { color: var(--neon-pink); font-size: 24px; }
-  .stat-label { font-size: 13px; color: var(--text-muted); margin-top: 6px; text-transform: uppercase; letter-spacing: 1px; }
+  .btn-secondary:hover { border-color: var(--text); }
+  .hero-stats {
+    position: absolute; bottom: 3rem;
+    display: flex; gap: 3rem; align-items: center;
+    animation: fadeUp 0.8s ease 0.5s both;
+  }
+  .stat { text-align: center; }
+  .stat-num { font-size: 1.6rem; font-weight: 700; color: var(--gold); letter-spacing: -0.02em; }
+  .stat-label { font-size: 0.65rem; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 0.2rem; }
+  .stat-div { width: 1px; height: 40px; background: rgba(201,168,76,0.2); }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
-  /* HERO CARD */
-  .hero-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 18px;
-    padding: 28px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  /* MARQUEE */
+  .marquee-wrap {
+    overflow: hidden; border-top: 1px solid rgba(201,168,76,0.15);
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+    padding: 1rem 0; background: var(--dark2);
   }
-  .hero-card-title {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin-bottom: 16px;
+  .marquee-track {
+    display: flex; gap: 3rem; width: max-content;
+    animation: marquee 20s linear infinite;
   }
-  .service-chip {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 14px;
-    border-radius: 12px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid transparent;
-    margin-bottom: 10px;
-    transition: border-color .2s, background .2s;
+  .marquee-item {
+    font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--text-muted); white-space: nowrap;
+    display: flex; align-items: center; gap: 1rem;
   }
-  .service-chip:hover { 
-    background: rgba(255,255,255,0.05); 
-    border-color: rgba(168,85,247,0.3); 
-  }
-  .chip-icon {
-    width: 42px; height: 42px;
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px; flex-shrink: 0;
-    background: rgba(168,85,247,0.1);
-  }
-  .chip-text { font-size: 15px; font-weight: 600; color: #fff; }
-  .chip-sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+  .marquee-item::after { content: '✦'; color: var(--gold); font-size: 0.5rem; }
+  @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
 
   /* SECTIONS */
-  .section { padding: 80px 6%; }
+  section { padding: 6rem 2rem; max-width: 1200px; margin: 0 auto; }
   .section-label {
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 2.5px;
-    color: var(--neon-purple);
-    text-transform: uppercase;
-    margin-bottom: 12px;
+    font-size: 0.65rem; letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.75rem;
   }
-  .section-title {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 46px;
-    line-height: 1.1;
-    color: #fff;
-    margin-bottom: 16px;
-    text-transform: uppercase;
+  .section-label::before { content: ''; width: 30px; height: 1px; background: var(--gold); }
+  h2 {
+    font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800;
+    letter-spacing: -0.02em; text-transform: uppercase; line-height: 1;
   }
-  .section-sub { font-size: 16px; color: var(--text-muted); max-width: 520px; line-height: 1.75; }
+  h2 em { color: var(--gold); font-style: normal; }
 
-  /* SERVICES GRID */
-  .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-top: 48px; }
-  .service-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 16px;
-    padding: 32px;
-    transition: border-color .2s, transform .2s;
+  /* OFFERING GRID */
+  .offering-header { margin-bottom: 4rem; }
+  .offering-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1px; background: rgba(201,168,76,0.1);
   }
-  .service-card:hover {
-    border-color: var(--neon-pink);
-    transform: translateY(-4px);
+  .offering-card {
+    background: var(--dark2); padding: 2.5rem 2rem;
+    transition: background 0.3s;
+    position: relative; overflow: hidden;
   }
-  .service-icon { font-size: 32px; margin-bottom: 20px; }
-  .service-card h3 { font-size: 18px; font-weight: 600; color: #fff; margin-bottom: 10px; }
-  .service-card p { font-size: 14px; color: var(--text-muted); line-height: 1.65; }
+  .offering-card::before {
+    content: ''; position: absolute; bottom: 0; left: 0;
+    width: 100%; height: 2px; background: var(--gold);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.4s ease;
+  }
+  .offering-card:hover { background: var(--dark3); }
+  .offering-card:hover::before { transform: scaleX(1); }
+  .offering-icon { font-size: 2rem; margin-bottom: 1.2rem; }
+  .offering-card h3 {
+    font-size: 1.1rem; font-weight: 700; letter-spacing: 0.04em;
+    text-transform: uppercase; margin-bottom: 0.75rem;
+  }
+  .offering-card p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.7; }
 
-  /* TESTIMONIALS & WHY US */
-  .why-section {
-    background: var(--bg-card);
-    padding: 80px 6%;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 80px;
-    align-items: center;
-    border-top: 1px solid var(--border-color);
-    border-bottom: 1px solid var(--border-color);
+  /* REVIEWS */
+  .reviews-section { background: var(--dark2); max-width: 100%; padding: 6rem 0; }
+  .reviews-inner { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+  .reviews-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3rem; flex-wrap: wrap; gap: 1rem; }
+  .rating-big { text-align: right; }
+  .rating-num { font-size: 4rem; font-weight: 800; color: var(--gold); line-height: 1; }
+  .rating-stars { color: var(--gold); font-size: 1rem; letter-spacing: 0.1em; }
+  .rating-count { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem; letter-spacing: 0.1em; }
+  .reviews-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+  .review-card {
+    border: 1px solid rgba(201,168,76,0.12); padding: 2rem;
+    position: relative;
+    transition: border-color 0.3s, transform 0.3s;
   }
-  .why-items { display: flex; flex-direction: column; gap: 24px; margin-top: 36px; }
-  .why-item { display: flex; gap: 16px; align-items: flex-start; }
-  .why-num {
-    width: 44px; height: 44px; border-radius: 12px;
-    background: rgba(236,72,153,0.1); color: var(--neon-pink);
-    font-family: 'Barlow Condensed', sans-serif; font-size: 22px;
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  .review-card:hover { border-color: rgba(201,168,76,0.35); transform: translateY(-4px); }
+  .review-stars { color: var(--gold); font-size: 0.8rem; margin-bottom: 1rem; letter-spacing: 0.1em; }
+  .review-text { font-size: 0.9rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 1.5rem; font-style: italic; }
+  .review-author { display: flex; align-items: center; gap: 0.75rem; }
+  .review-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--smoke); border: 1px solid rgba(201,168,76,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700; color: var(--gold);
   }
-  .why-text h4 { color: #fff; font-size: 16px; font-weight: 600; margin-bottom: 6px; }
-  .why-text p { color: var(--text-muted); font-size: 14px; line-height: 1.65; }
-  
-  .testimonials { display: flex; flex-direction: column; gap: 20px; }
-  .testimonial-card {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.05);
-    border-radius: 14px;
-    padding: 24px;
-  }
-  .t-stars { color: var(--neon-pink); font-size: 16px; margin-bottom: 12px; letter-spacing: 2px;}
-  .t-text { color: var(--text-main); font-style: italic; font-size: 15px; line-height: 1.7; margin-bottom: 16px; }
-  .t-author { display: flex; align-items: center; gap: 12px; }
-  .t-avatar {
-    width: 40px; height: 40px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
-    color: #fff; font-weight: 600; font-size: 14px;
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-  }
-  .t-name { color: #fff; font-size: 14px; font-weight: 600; }
-  .t-loc { color: var(--text-muted); font-size: 12px; }
+  .review-name { font-size: 0.85rem; font-weight: 600; }
+  .review-meta { font-size: 0.7rem; color: var(--text-muted); letter-spacing: 0.05em; }
 
-  /* CONTACT / INFO */
-  .contact-section {
-    padding: 80px 6%;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 60px;
-    align-items: start;
+  /* CTA SECTION */
+  .cta-section {
+    text-align: center; padding: 8rem 2rem;
+    max-width: 100%;
+    background: radial-gradient(ellipse 70% 50% at 50% 50%, rgba(201,168,76,0.07) 0%, transparent 70%);
+    position: relative; overflow: hidden;
   }
-  .contact-info { display: flex; flex-direction: column; gap: 24px; margin-top: 40px; }
-  .contact-item { display: flex; gap: 16px; align-items: center; }
-  .contact-icon {
-    width: 48px; height: 48px; border-radius: 12px;
-    background: rgba(168,85,247,0.1); color: var(--neon-purple);
-    display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;
-  }
-  .contact-item h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; color: #fff;}
-  .contact-item p { font-size: 14px; color: var(--text-muted); }
-  
-  .map-card {
-    background: var(--bg-card);
-    border-radius: 18px;
-    padding: 8px;
-    border: 1px solid var(--border-color);
-    height: 100%;
-    min-height: 350px;
-    display: flex;
-    flex-direction: column;
-  }
-  .map-placeholder {
-    background: #27272a;
-    border-radius: 12px;
-    flex-grow: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-muted);
-    font-size: 14px;
-    text-align: center;
-    padding: 20px;
-  }
+  .cta-inner { max-width: 700px; margin: 0 auto; }
+  .cta-section h2 { font-size: clamp(2.5rem, 6vw, 5rem); margin-bottom: 1.5rem; }
+  .cta-section p { color: var(--text-muted); font-size: 1rem; margin-bottom: 2.5rem; line-height: 1.7; }
+  .cta-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+  /* INFO */
+  .info-section { border-top: 1px solid rgba(201,168,76,0.12); }
+  .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 3rem; }
+  .info-block { }
+  .info-label { font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.75rem; }
+  .info-value { font-size: 0.95rem; line-height: 1.6; color: var(--text); }
+  .info-value a { color: var(--text); text-decoration: none; border-bottom: 1px solid rgba(201,168,76,0.3); padding-bottom: 1px; transition: border-color 0.3s; }
+  .info-value a:hover { border-color: var(--gold); }
 
   /* FOOTER */
   footer {
-    background: var(--bg-card);
-    padding: 40px 6%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 16px;
-    border-top: 1px solid var(--border-color);
+    border-top: 1px solid rgba(201,168,76,0.12);
+    padding: 2rem; text-align: center;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 1rem;
   }
-  footer p { color: var(--text-muted); font-size: 13px; }
-  .footer-links { display: flex; gap: 20px; }
-  .footer-links a { color: var(--text-muted); text-decoration: none; font-size: 13px; transition: color .2s;}
-  .footer-links a:hover { color: var(--neon-pink); }
+  .footer-logo { font-size: 0.9rem; font-weight: 700; letter-spacing: 0.2em; color: var(--gold); text-transform: uppercase; }
+  .footer-links { display: flex; gap: 1.5rem; }
+  .footer-links a { font-size: 0.75rem; color: var(--text-muted); text-decoration: none; letter-spacing: 0.1em; text-transform: uppercase; transition: color 0.3s; }
+  .footer-links a:hover { color: var(--gold); }
+  footer p { font-size: 0.7rem; color: var(--text-muted); }
 
-  /* WHATSAPP */
-  .whatsapp-btn {
-    position: fixed;
-    bottom: 28px; right: 28px;
-    z-index: 200;
-    width: 60px; height: 60px;
-    border-radius: 50%;
-    background: #25d366;
-    color: #fff;
-    border: none;
-    font-size: 30px;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 4px 20px rgba(37,211,102,0.3);
+  /* WHATSAPP FLOAT */
+  .wa-float {
+    position: fixed; bottom: 2rem; right: 2rem; z-index: 90;
+    width: 52px; height: 52px; border-radius: 50%;
+    background: #25D366; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 20px rgba(37,211,102,0.4);
     text-decoration: none;
-    transition: transform .2s;
+    animation: waPop 0.5s ease 1s both;
+    transition: transform 0.3s;
   }
-  .whatsapp-btn:hover { transform: scale(1.08); }
+  .wa-float:hover { transform: scale(1.1); }
+  .wa-float svg { width: 26px; height: 26px; fill: white; }
+  @keyframes waPop { from{opacity:0;transform:scale(0.5)} to{opacity:1;transform:scale(1)} }
 
-  /* MOBILE */
-  @media (max-width: 768px) {
-    .hero { grid-template-columns: 1fr; gap: 40px; padding: 40px 5% 60px; }
-    .hero h1 { font-size: 54px; }
-    .hero-card { display: none; }
-    .why-section { grid-template-columns: 1fr; gap: 50px; }
-    .contact-section { grid-template-columns: 1fr; }
+  /* REVEAL */
+  .reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* RESPONSIVE */
+  @media(max-width:768px) {
     .nav-links { display: none; }
-    .hero-stats { gap: 20px; flex-wrap: wrap; justify-content: space-between;}
+    .hamburger { display: flex; }
+    .hero-stats { gap: 1.5rem; bottom: 2rem; }
+    .stat-div { display: none; }
+    .reviews-header { justify-content: flex-start; }
+    .rating-big { text-align: left; }
+    footer { flex-direction: column; text-align: center; }
   }
 </style>
 </head>
 <body>
 
-<div class="demo-banner">
-  ✨ El mejor ambiente, shishas y cócteles — <span>Apertura a las 16:00</span>
-</div>
-
-<nav>
-  <div class="logo">SKINNY <span>CLUB</span></div>
-  <div class="nav-links">
-    <a href="#carta">Carta & Shishas</a>
-    <a href="#reseñas">Reseñas</a>
-    <a href="#contacto">Dónde estamos</a>
-  </div>
-  <button class="nav-cta">Reservar Mesa</button>
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="nav-logo">Skinny Club</a>
+  <ul class="nav-links">
+    <li><a href="#oferta">La experiencia</a></li>
+    <li><a href="#resenas">Opiniones</a></li>
+    <li><a href="#visita">Dónde estamos</a></li>
+  </ul>
+  <a href="https://wa.me/34614298780?text=Hola,%20quería%20reservar%20una%20mesa" class="nav-cta" target="_blank" rel="noopener">Reservar</a>
+  <div class="hamburger" id="ham"><span></span><span></span><span></span></div>
 </nav>
 
-<div class="urgency-bar">
-  <p>🔥 Tardeo, Cócteles y el mejor trato garantizado en Parla</p>
-  <a href="tel:614298780" class="urgency-tel">Llamar: 614 29 87 80</a>
+<!-- HERO -->
+<section class="hero" style="padding:0;max-width:100%;">
+  <div class="hero-bg"></div>
+  <!-- smoke particles injected by JS -->
+  <div class="hero-badge"><span class="badge-dot"></span>Abrimos hoy a las 16:00</div>
+  <h1>SKINNY<br><span>CLUB</span></h1>
+  <p class="hero-sub">Shisha Lounge &amp; Cocktail Bar &mdash; Parla, Madrid</p>
+  <div class="hero-actions">
+    <a href="https://wa.me/34614298780?text=Hola,%20quería%20reservar%20una%20mesa" class="btn-primary" target="_blank" rel="noopener">Reservar mesa</a>
+    <a href="#oferta" class="btn-secondary">Ver la experiencia</a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num">4.7★</div><div class="stat-label">Google Reviews</div></div>
+    <div class="stat-div"></div>
+    <div class="stat"><div class="stat-num">187</div><div class="stat-label">Opiniones</div></div>
+    <div class="stat-div"></div>
+    <div class="stat"><div class="stat-num">16:00</div><div class="stat-label">Apertura diaria</div></div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track" id="marquee">
+    <div class="marquee-item">Shishas premium</div>
+    <div class="marquee-item">Cócteles creativos</div>
+    <div class="marquee-item">Batidos épicos</div>
+    <div class="marquee-item">El mejor ambiente</div>
+    <div class="marquee-item">Trato de diez</div>
+    <div class="marquee-item">Parla, Madrid</div>
+    <div class="marquee-item">Desde las 16:00</div>
+    <div class="marquee-item">Reserva ahora</div>
+    <div class="marquee-item">Shishas premium</div>
+    <div class="marquee-item">Cócteles creativos</div>
+    <div class="marquee-item">Batidos épicos</div>
+    <div class="marquee-item">El mejor ambiente</div>
+    <div class="marquee-item">Trato de diez</div>
+    <div class="marquee-item">Parla, Madrid</div>
+    <div class="marquee-item">Desde las 16:00</div>
+    <div class="marquee-item">Reserva ahora</div>
+  </div>
 </div>
 
-<section class="hero">
-  <div>
-    <span class="hero-badge">💨 Shisha Lounge & Cocktail Bar</span>
-    <h1>Tu Nuevo<br>Punto de<br><span>Encuentro</span></h1>
-    <p>El mejor ambiente de Parla. Cachimbas premium, cócteles increíbles y batidos que son una pasada. Los precios son asequibles y el trato inmejorable. ¿Te vienes?</p>
-    <div class="hero-btns">
-      <a href="#contacto" class="btn-primary">Ven a conocernos</a>
-      <a href="#carta" class="btn-secondary">Ver opciones</a>
-    </div>
-    <div class="hero-stats">
-      <div>
-        <div class="stat-num">4,7<span>★</span></div>
-        <div class="stat-label">187 Reseñas Google</div>
-      </div>
-      <div>
-        <div class="stat-num">10-20<span>€</span></div>
-        <div class="stat-label">Precio por persona</div>
-      </div>
-      <div>
-        <div class="stat-num">16<span>:00</span></div>
-        <div class="stat-label">Apertura diaria</div>
-      </div>
-    </div>
+<!-- OFFERING -->
+<section id="oferta" style="max-width:1200px;margin:0 auto;">
+  <div class="offering-header reveal">
+    <div class="section-label">La experiencia</div>
+    <h2>Mucho más<br>que <em>un bar</em></h2>
   </div>
-  
-  <div class="hero-card">
-    <div class="hero-card-title">Lo más top del club</div>
-    <div class="service-chip">
-      <div class="chip-icon">💨</div>
-      <div>
-        <div class="chip-text">Shishas Premium</div>
-        <div class="chip-sub">Sabores exclusivos y personalizados</div>
-      </div>
-    </div>
-    <div class="service-chip">
-      <div class="chip-icon">🍹</div>
-      <div>
-        <div class="chip-text">Coctelería & Batidos</div>
-        <div class="chip-sub">Los batidos son una auténtica pasada</div>
-      </div>
-    </div>
-    <div class="service-chip">
-      <div class="chip-icon">🎶</div>
-      <div>
-        <div class="chip-text">Ambientazo</div>
-        <div class="chip-sub">Trato estupendo, te sentirás como en casa</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="section" id="carta">
-  <div class="section-label">Qué Ofrecemos</div>
-  <h2 class="section-title">Mucho más que un bar</h2>
-  <p class="section-sub">Destacamos por nuestra creatividad, variedad y por hacer las cosas diferentes.</p>
-  
-  <div class="services-grid">
-    <div class="service-card">
-      <div class="service-icon">💨</div>
+  <div class="offering-grid reveal">
+    <div class="offering-card">
+      <div class="offering-icon">💨</div>
       <h3>Cachimbas a tu gusto</h3>
-      <p>Una variedad de sabores enorme. Te damos la opción de personalizar todo para que fumes exactamente lo que te apetece.</p>
+      <p>Una variedad de sabores enorme. Personalizamos cada shisha para que fumes exactamente lo que te apetece. Calidad premium garantizada.</p>
     </div>
-    <div class="service-card">
-      <div class="service-icon">🍹</div>
-      <h3>Cócteles Creativos</h3>
-      <p>Bebidas preparadas al detalle. Combinaciones geniales a muy buen precio, perfectas para acompañar el tardeo.</p>
+    <div class="offering-card">
+      <div class="offering-icon">🍹</div>
+      <h3>Coctelería creativa</h3>
+      <p>Bebidas preparadas al detalle. Combinaciones únicas a muy buen precio, perfectas para acompañar el tardeo más chulo de Parla.</p>
     </div>
-    <div class="service-card">
-      <div class="service-icon">🍓</div>
-      <h3>Batidos Épicos</h3>
-      <p>Nuestros clientes lo dicen: ¡los batidos son una pasada! Una gran variedad en la carta para los más golosos.</p>
+    <div class="offering-card">
+      <div class="offering-icon">🍓</div>
+      <h3>Batidos épicos</h3>
+      <p>Los clientes lo dicen sin parar: los batidos son una auténtica pasada. Gran variedad en carta para los más golosos del grupo.</p>
     </div>
-    <div class="service-card">
-      <div class="service-icon">🤝</div>
-      <h3>Trato de Diez</h3>
-      <p>Los camareros te hacen sentir como en casa. Súper atentos, amables y siempre con ganas de recomendarte lo mejor.</p>
-    </div>
-  </div>
-</section>
-
-<section class="why-section" id="reseñas">
-  <div>
-    <div class="section-label">Opiniones Reales</div>
-    <h2 class="section-title">Lo que dicen de nosotros</h2>
-    <p class="section-sub">Con una nota de 4,7 sobre 5 en Google, nuestros clientes son nuestra mejor carta de presentación.</p>
-    
-    <div class="why-items">
-      <div class="why-item">
-        <div class="why-num">01</div>
-        <div class="why-text">
-          <h4>Precios Asequibles</h4>
-          <p>Ni caro ni barato, el precio justo (10-20€ por persona) para una experiencia premium.</p>
-        </div>
-      </div>
-      <div class="why-item">
-        <div class="why-num">02</div>
-        <div class="why-text">
-          <h4>Variedad y Creatividad</h4>
-          <p>Innovamos constantemente con nuestros sabores y mezclas exclusivas.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <div class="testimonials">
-    <div class="testimonial-card">
-      <div class="t-stars">★★★★★</div>
-      <p class="t-text">"Hemos salido realmente sorprendidos de Skinny Club Parla. La variedad de sabores es enorme y demuestra que aquí hay creatividad y ganas de hacer las cosas diferentes."</p>
-      <div class="t-author">
-        <div class="t-avatar">I</div>
-        <div>
-          <div class="t-name">Isra García</div>
-          <div class="t-loc">Local Guide · Hace 3 meses</div>
-        </div>
-      </div>
-    </div>
-    <div class="testimonial-card">
-      <div class="t-stars">★★★★★</div>
-      <p class="t-text">"Muy buen ambiente, los camareros te hacen sentir como en casa, además de que se fuma muy bien. Muy agradecida con el trato."</p>
-      <div class="t-author">
-        <div class="t-avatar">E</div>
-        <div>
-          <div class="t-name">Estefania Insua</div>
-          <div class="t-loc">Local Guide · Hace 2 años</div>
-        </div>
-      </div>
-    </div>
-    <div class="testimonial-card">
-      <div class="t-stars">★★★★★</div>
-      <p class="t-text">"Está todo súper rico!! Tienen una gran variedad en la carta, tanto en cachimbas como bebidas!! Los batidos son una pasada y los chicos súper atentos."</p>
-      <div class="t-author">
-        <div class="t-avatar">N</div>
-        <div>
-          <div class="t-name">Nare Nalbandyan</div>
-          <div class="t-loc">Hace 5 años</div>
-        </div>
-      </div>
+    <div class="offering-card">
+      <div class="offering-icon">🤝</div>
+      <h3>Trato de diez</h3>
+      <p>Te hacemos sentir como en casa desde el primer momento. Siempre atentos, siempre con una recomendación. Eso no se improvisa.</p>
     </div>
   </div>
 </section>
 
-<section class="contact-section" id="contacto">
-  <div>
-    <div class="section-label">Visítanos</div>
-    <h2 class="section-title">¿Te vienes al Club?</h2>
-    <p class="section-sub">Te esperamos todos los días a partir de las 16:00. Pásate o contáctanos para asegurar tu mesa.</p>
-    
-    <div class="contact-info">
-      <div class="contact-item">
-        <div class="contact-icon">📍</div>
-        <div>
-          <h4>Ubicación</h4>
-          <p>C. las Dehesillas, 2 posterior, local 9<br>28981 Parla, Madrid</p>
-        </div>
-      </div>
-      <div class="contact-item">
-        <div class="contact-icon">📞</div>
-        <div>
-          <h4>Teléfono</h4>
-          <p>614 29 87 80</p>
-        </div>
-      </div>
-      <div class="contact-item">
-        <div class="contact-icon">⏰</div>
-        <div>
-          <h4>Horario</h4>
-          <p>Abierto todos los días · Apertura: 16:00</p>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <div class="map-card">
-    <div class="map-placeholder">
+<!-- REVIEWS -->
+<div class="reviews-section" id="resenas">
+  <div class="reviews-inner">
+    <div class="reviews-header reveal">
       <div>
-        <p style="color: #fff; font-weight: bold; margin-bottom: 8px; font-size: 16px;">Skinny Club</p>
-        <p>C. las Dehesillas, 2 posterior, Parla</p>
-        <a href="https://maps.google.com/?q=Skinny+Club+Parla" target="_blank" style="display: inline-block; margin-top: 15px; color: var(--neon-pink); text-decoration: none; border: 1px solid var(--neon-pink); padding: 8px 16px; border-radius: 20px;">Ver en Google Maps →</a>
+        <div class="section-label">Opiniones</div>
+        <h2>Lo que<br>dicen de <em>nosotros</em></h2>
       </div>
+      <div class="rating-big">
+        <div class="rating-num">4.7</div>
+        <div class="rating-stars">★★★★★</div>
+        <div class="rating-count">187 reseñas en Google</div>
+      </div>
+    </div>
+    <div class="reviews-grid reveal">
+      <div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">"Hemos salido realmente sorprendidos. La variedad de sabores es enorme y demuestra que aquí hay creatividad y ganas de hacer las cosas diferentes."</p>
+        <div class="review-author">
+          <div class="review-avatar">IG</div>
+          <div><div class="review-name">Isra García</div><div class="review-meta">Local Guide · hace 3 meses</div></div>
+        </div>
+      </div>
+      <div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">"Muy buen ambiente, los camareros te hacen sentir como en casa. Además se fuma muy bien. Muy agradecida con el trato tan bueno que nos dieron."</p>
+        <div class="review-author">
+          <div class="review-avatar">EI</div>
+          <div><div class="review-name">Estefanía Insua</div><div class="review-meta">Local Guide · hace 2 años</div></div>
+        </div>
+      </div>
+      <div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">"Todo súper rico! Tienen una gran variedad en carta, tanto en cachimbas como en bebidas. Los batidos son una pasada y los chicos súper atentos."</p>
+        <div class="review-author">
+          <div class="review-avatar">NN</div>
+          <div><div class="review-name">Nare Nalbandyan</div><div class="review-meta">hace 5 años</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta-section">
+  <div class="cta-inner reveal">
+    <div class="section-label" style="justify-content:center;margin-bottom:1.5rem;">¿Te vienes?</div>
+    <h2>TU NOCHE<br><em>EMPIEZA</em><br>AQUÍ</h2>
+    <p>Reserva tu mesa ahora mismo. Sin esperas, sin complicaciones. Te esperamos todos los días a partir de las 16:00.</p>
+    <div class="cta-actions">
+      <a href="https://wa.me/34614298780?text=Hola,%20quería%20reservar%20una%20mesa" class="btn-primary" target="_blank" rel="noopener">Reservar por WhatsApp</a>
+      <a href="tel:614298780" class="btn-secondary">Llamar ahora</a>
+    </div>
+  </div>
+</div>
+
+<!-- INFO -->
+<section id="visita" class="info-section" style="max-width:1200px;margin:0 auto;">
+  <div class="info-grid reveal">
+    <div class="info-block">
+      <div class="info-label">Ubicación</div>
+      <div class="info-value"><a href="https://maps.google.com/?q=Skinny+Club+Parla" target="_blank">C. las Dehesillas, 2 posterior, local 9<br>28981 Parla, Madrid</a></div>
+    </div>
+    <div class="info-block">
+      <div class="info-label">Horario</div>
+      <div class="info-value">Abierto todos los días<br>Apertura: 16:00</div>
+    </div>
+    <div class="info-block">
+      <div class="info-label">Contacto</div>
+      <div class="info-value"><a href="tel:614298780">614 29 87 80</a></div>
+    </div>
+    <div class="info-block">
+      <div class="info-label">Precio medio</div>
+      <div class="info-value">10–20€ por persona</div>
     </div>
   </div>
 </section>
 
+<!-- FOOTER -->
 <footer>
-  <div class="logo" style="font-size: 20px;">SKINNY <span>CLUB</span></div>
-  <p>© 2025 Skinny Club · Parla, Madrid</p>
+  <div class="footer-logo">Skinny Club</div>
   <div class="footer-links">
     <a href="https://instagram.com" target="_blank">Instagram</a>
     <a href="https://agorapos.com" target="_blank">Reservas</a>
+    <a href="https://wa.me/34614298780" target="_blank">WhatsApp</a>
   </div>
+  <p>© 2025 Skinny Club · Parla, Madrid</p>
 </footer>
 
-<a href="https://wa.me/34614298780?text=Hola,%20quería%20información%20para%20reservar%20una%20mesa" class="whatsapp-btn" target="_blank" title="Reserva por WhatsApp">
-  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+<!-- WHATSAPP FLOAT -->
+<a class="wa-float" href="https://wa.me/34614298780?text=Hola,%20quería%20reservar%20una%20mesa" target="_blank" rel="noopener" aria-label="Reservar por WhatsApp">
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
 </a>
 
+<script>
+// Smoke particles
+const hero = document.querySelector('.hero');
+for(let i=0;i<8;i++){
+  const p = document.createElement('div');
+  p.className='smoke-particle';
+  const size = 100+Math.random()*200;
+  p.style.cssText=`width:${size}px;height:${size}px;left:${Math.random()*100}%;bottom:${Math.random()*30}%;animation-duration:${8+Math.random()*12}s;animation-delay:${Math.random()*8}s;`;
+  hero.appendChild(p);
+}
+
+// Nav scroll
+const nav=document.getElementById('nav');
+window.addEventListener('scroll',()=>{nav.classList.toggle('scrolled',window.scrollY>50);});
+
+// Reveal on scroll
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');}});
+},{threshold:0.15});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+</script>
 </body>
 </html>
