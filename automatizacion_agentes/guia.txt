@@ -1,1 +1,279 @@
+Aquí tienes la Guía Maestra Paso a Paso para implementar tu fábrica automatizada de demos en Windows 11. He unificado todo el sistema para que tengas un manual claro de cómo crear los archivos, cómo usarlos en tu día a día y qué vas a obtener exactamente al final.
 
+🗺️ Mapa Visual del Proceso
+Antes de picar código, mira cómo viaja la información en tu sistema:
+
+generar_briefing.py ➔ Crea la carpeta del cliente y el briefing.md.
+
+Tú (Control de Calidad) ➔ Revisas o editas el briefing.md (opcional).
+
+app.py ➔ Lee el briefing y ejecuta los agentes (1.1, 1.2, 2.1...) en cascada heredando el contexto.
+
+Resultado Final ➔ Se auto-generan propuesta.md e index.html listos para subir a Vercel.
+
+🗂️ Paso 1: Configurar la Estructura de Carpetas
+Abre tu proyecto local (Mi_agencia_virtual) y asegúrate de que tus archivos de agentes en la carpeta agentes sigan la nomenclatura numérica. Tu árbol debe quedar exactamente así:
+
+Plaintext
+Mi_agencia_virtual/
+├── agentes/
+│   ├── 1.1-product-manager.md
+│   ├── 1.2-copywriter.md
+│   ├── 1.3-sales.md
+│   ├── 2.1-seo.md
+│   ├── 2.2-backend.md
+│   ├── 2.3-frontend.md
+│   ├── 2.4-qa.md
+│   ├── 3.1-analytics.md
+│   ├── 3.2-customer-success.md
+│   └── 3.3-onboarding.md
+├── clientes/               # Aquí se crearán las carpetas de tus clientes
+├── plantillas/
+│   └── briefing-plantilla.md
+├── generar_briefing.py     # Script 1
+└── app.py                  # Script 2 (Orquestador)
+📜 Paso 2: Crear e Implementar los Archivos Código
+Crea estos tres archivos clave en la raíz de tu proyecto usando tu editor de código (como VS Code):
+
+1. La Plantilla Base (plantillas/briefing-plantilla.md)
+Crea este archivo Markdown que servirá como el molde estructural para todos tus clientes:
+
+Markdown
+# Briefing de cliente — {nombre_empresa}
+
+## Datos básicos
+- Empresa: {nombre_empresa}
+- Sector: {sector}
+- Ciudad: {ciudad}
+- Web actual: {web_actual_o_url}
+- Años en el mercado: {anos_mercado_o_estimacion}
+- Tamaño aproximado: {tamano_empresa}
+
+## Contacto
+- Nombre del decisor: PENDIENTE
+- Cargo: Propietario / Director
+- Cómo llegué a él: Prospección en frío
+- Fecha primer contacto: Pendiente de confirmar reunión
+
+## Situación actual
+- ¿Tienen web? {estado_web}
+- ¿Tienen Google My Business? Pendiente de verificar
+- ¿Tienen redes sociales activas? Pendiente de verificar
+- ¿Cómo consiguen clientes ahora mismo? Tradicional / Boca a boca
+
+## Problemas detectados (Análisis de Prospección)
+{lista_problemas_detectados}
+
+## Lo que necesitan (Pre-Discovery)
+- Problema real: PENDIENTE — rellenar tras reunión
+- Lo que piden: PENDIENTE
+- Lo que realmente necesitan: Una landing de alta conversión enfocada en captar leads locales en {ciudad} y transmitir autoridad.
+
+## Propuesta
+- Servicios incluidos: Rediseño Web + SEO Local + Optimización Móvil
+- Precio acordado: Rango estimado {rango_precio_estimado}
+- Fecha de entrega: PENDIENTE
+- Mantenimiento mensual: Por proponer — {rango_mantenimiento}
+
+## Estado del proyecto
+- [x] Primer contacto (Prospección)
+- [ ] Reunión de discovery
+- [ ] Propuesta enviada
+- [ ] Propuesta aceptada
+- [ ] En desarrollo
+
+## Notas y contexto extra
+{notas_contexto_prospeccion}
+2. El Generador de Entrada (generar_briefing.py)
+Pega este código. Se encarga de hacer la investigación previa del nicho y crear la ficha del cliente:
+
+Python
+import os
+import json
+from openai import OpenAI
+
+client = OpenAI()
+
+def auto_prospectar_cliente(nombre_empresa, sector, ciudad, url_web="No tiene"):
+    nombre_carpeta = nombre_empresa.lower().replace(" ", "-").replace(".", "")
+    ruta_cliente = os.path.join("clientes", nombre_carpeta)
+    os.makedirs(ruta_cliente, exist_ok=True)
+    
+    prompt_prospeccion = f"""
+    Actúa como un Consultor de Ventas B2B Experto en Agencias Web.
+    Voy a venderle una web a:
+    - Empresa: {nombre_empresa} | Sector: {sector} | Ciudad: {ciudad} | Web: {url_web}
+    
+    Analiza el sector. Responde ÚNICAMENTE con un JSON estrictamente formateado (sin markdown ```json):
+    {{
+      "anos_mercado": "Dato estimado (ej: Más de 10 años)",
+      "tamano": "Pequeña empresa local / Mediana empresa",
+      "estado_web": "Breve análisis de su situación digital actual",
+      "problemas": "- Falta de optimización local\\n- Diseño obsoleto\\n- No captan leads online",
+      "precio_estimado": "1200€ - 1800€",
+      "mantenimiento": "60€ - 80€/mes",
+      "notas": "- Ángulo de venta: Atacar la pérdida de clientes frente a competidores en {ciudad}"
+    }}
+    """
+    print(f"🔍 Investigando y perfilando a: {nombre_empresa}...")
+    response = client.chat.completions.create(
+        model="gpt-4o", messages=[{"role": "user", "content": prompt_prospeccion}], temperature=0.3
+    )
+    
+    try:
+        data = json.loads(response.choices[0].message.content.strip())
+    except Exception:
+        data = {"anos_mercado": "Pendiente", "tamano": "Pyme", "estado_web": "Desactualizada", 
+                "problemas": "- Sin SEO local", "precio_estimado": "1200€", "mantenimiento": "60€/mes", "notas": "Atacar dolor"}
+
+    ruta_plantilla = os.path.join("plantillas", "briefing-plantilla.md")
+    with open(ruta_plantilla, 'r', encoding='utf-8') as f:
+        plantilla = f.read()
+
+    briefing_final = plantilla.format(
+        nombre_empresa=nombre_empresa, sector=sector, ciudad=ciudad, web_actual_o_url=url_web,
+        anos_mercado_o_estimacion=data["anos_mercado"], tamano_empresa=data["tamano"], estado_web=data["estado_web"],
+        lista_problemas_detectados=data["problemas"], rango_precio_estimado=data["precio_estimado"],
+        rango_mantenimiento=data["mantenimiento"], notas_contexto_prospeccion=data["notas"]
+    )
+    
+    ruta_salida = os.path.join(ruta_cliente, "briefing.md")
+    with open(ruta_salida, "w", encoding="utf-8") as f:
+        f.write(briefing_final)
+        
+    print(f"✨ ¡Carpeta y Briefing creados con éxito en: {ruta_salida}!")
+
+if __name__ == "__main__":
+    # 📝 MODIFICA ESTOS DATOS PARA CAMBIAR DE CLIENTE
+    auto_prospectar_cliente(
+        nombre_empresa="Grupo Servigur S.A.",
+        sector="Seguridad privada, mantenimiento y limpieza",
+        ciudad="Leganés, Madrid",
+        url_web="gruposervigur.com"
+    )
+3. El Orquestador Hereditario (app.py)
+Este script automatiza la ejecución en cadena de tus 10 agentes y extrae el código de la web:
+
+Python
+import os
+import re
+from openai import OpenAI
+
+client = OpenAI()
+
+def ejecutar_agencia_automatica(nombre_cliente_carpeta):
+    ruta_cliente = os.path.join("clientes", nombre_cliente_carpeta)
+    ruta_briefing = os.path.join(ruta_cliente, "briefing.md")
+    carpeta_agentes = "agentes"
+    
+    if not os.path.exists(ruta_briefing):
+        print(f"❌ Error: No existe '{ruta_briefing}'")
+        return
+        
+    with open(ruta_briefing, 'r', encoding='utf-8') as f:
+        briefing_input = f.read()
+        
+    archivos_agentes = sorted([f for f in os.listdir(carpeta_agentes) if f.endswith('.md')])
+    
+    contexto_acumulado = f"Briefing inicial del cliente:\n{briefing_input}"
+    registro_final_reporte = f"# 🚀 PROCESO DE AGENCIA - CLIENTE: {nombre_cliente_carpeta.upper()}\n\n"
+    codigo_html_extraido = None
+
+    print(f"🔥 Ejecutando agentes en cascada para: {nombre_cliente_carpeta}")
+    print("-" * 60)
+
+    for archivo_md in archivos_agentes:
+        ruta_md = os.path.join(carpeta_agentes, archivo_md)
+        nombre_agente = archivo_md.replace('.md', '')
+        
+        print(f"⚙️ [Ejecutando] -> {nombre_agente}...")
+        with open(ruta_md, 'r', encoding='utf-8') as f:
+            plantilla_prompt = f.read()
+        
+        try:
+            prompt_final = plantilla_prompt.format(contexto_heredado=contexto_acumulado)
+        except KeyError:
+            prompt_final = plantilla_prompt
+        
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": f"Eres el agente inteligente {nombre_agente}."},
+                {"role": "user", "content": prompt_final}
+            ],
+            temperature=0.4
+        )
+        respuesta_agente = response.choices[0].message.content
+        
+        # Cazar el código HTML si es el agente frontend
+        if "frontend" in nombre_agente.lower():
+            match = re.search(r'```html\n(.*?)\n```', respuesta_agente, re.DOTALL)
+            if match:
+                codigo_html_extraido = match.group(1)
+        
+        # El núcleo de la herencia: Acumular la respuesta para el siguiente agente
+        contexto_acumulado += f"\n\n--- INFORME DE: {nombre_agente.upper()} ---\n{respuesta_agente}"
+        registro_final_reporte += f"## 🤖 Agente: {nombre_agente}\n\n{respuesta_agente}\n\n{'='*40}\n\n"
+
+    # Guardar entregables
+    ruta_salida_reporte = os.path.join(ruta_cliente, "propuesta.md")
+    with open(ruta_salida_reporte, 'w', encoding='utf-8') as f:
+        f.write(registro_final_reporte)
+    print(f"📝 Historial completo guardado en: {ruta_salida_reporte}")
+        
+    if codigo_html_extraido:
+        ruta_salida_html = os.path.join(ruta_cliente, "index.html")
+        with open(ruta_salida_html, 'w', encoding='utf-8') as f:
+            f.write(codigo_html_extraido)
+        print(f"🌐 ¡Web Demo HTML guardada en: {ruta_salida_html}!")
+
+    print(f"\n🏆 ¡Fábrica finalizada para '{nombre_cliente_carpeta}'!")
+
+if __name__ == "__main__":
+    # 📝 INSERTA AQUÍ EL NOMBRE DE LA CARPETA QUE GENERASTE EN EL PASO 1
+    cliente_activo = "grupo-servigur-sa" 
+    ejecutar_agencia_automatica(cliente_activo)
+🛠️ Paso 3: Guía de Uso Diario (Cómo Lanzarlo)
+Cada vez que encuentres una empresa a la que quieras venderle una página web, harás lo siguiente:
+
+1. Activar la Semilla
+Abre generar_briefing.py, edita las líneas de abajo con los datos de la nueva empresa y ejecuta en tu terminal:
+
+Bash
+python generar_briefing.py
+Esto creará la carpeta automáticamente (ej: clientes/grupo-servigur-sa/) y el archivo briefing.md.
+
+2. El Toque Humano (Opcional pero recomendado)
+Abres clientes/grupo-servigur-sa/briefing.md. Si conoces detalles como "el decisor es el padre y el hijo es el champion interno", escríbelo en la sección de notas y guarda el archivo.
+
+3. Encender la Cadena de Montaje
+Abre app.py, pon cliente_activos = "grupo-servigur-sa" abajo del todo y ejecuta en tu terminal:
+
+Bash
+python app.py
+Verás cómo la pantalla empieza a avanzar mostrando [Ejecutando] -> 1.1-product-manager, 1.2-copywriter, etc. Tardará cerca de un minuto en completar las 10 fases.
+
+🏆 Paso 4: Cómo Queda el Resultado Final
+Al terminar la ejecución, si entras en la carpeta clientes/grupo-servigur-sa/, verás que la IA ha depositado tus armas de venta letales:
+
+📄 1. El archivo propuesta.md
+Es un informe técnico-comercial masivo de decenas de páginas. Contiene:
+
+Estrategia del Product Manager: Secciones recomendadas y arquitectura web.
+
+Textos del Copywriter: Títulos con gancho, textos de confianza enfocados en sus 35 años de experiencia, llamadas a la acción (CTA) claras y sección de servicios sin rodeos.
+
+Estrategia SEO: Palabras clave locales de Madrid Sur y Leganés estructuradas para el negocio.
+
+Fases de Onboarding y Customer Success: Emails automáticos de bienvenida y guías preparados para el cliente una vez firme el contrato.
+
+🌐 2. El archivo index.html
+Es el plato fuerte. Un archivo de código HTML5 y CSS3 integrado, limpio y autónomo que incluye:
+
+El Manual de Estilo Aplicado: Fuentes de tipografía corporativa de Google Fonts e inyección de colores :root específicos para el sector (tonos profesionales de autoridad, sin el cursor de shisha).
+
+Imágenes contextuales: Enlaces directos a fotografías profesionales de Unsplash optimizadas con palabras clave (seguridad, limpieza, oficinas).
+
+Diseño Responsivo: Estructuras modernas adaptadas a teléfonos móviles y ordenadores.
+
+¿Qué haces ahora? Haces un git commit y git push a tu repositorio de GitHub. Como lo tienes vinculado a Vercel, la nueva demo se desplegará sola en 15 segundos. Le envías el enlace al hijo del dueño por WhatsApp y le dices: "Mira la propuesta de valor y la presencia online que podemos montar para tu padre". Tienes la venta prácticamente cerrada.
