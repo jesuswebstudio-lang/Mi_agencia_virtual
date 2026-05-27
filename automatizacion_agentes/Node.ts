@@ -197,22 +197,34 @@ function Problema() {
     <section className="bg-[#0A0A0A] py-24 px-12 border-t border-white/5">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-16">
-          <Label>El problema</Label>          <h2 className="font-serif text-4xl text-white tracking-tight mb-3">Tu negocio pierde dinero <em className="italic text-zinc-500">mientras duermes.</em></h2>
+          <Label>El problema</Label>
+          <h2 className="font-serif text-4xl text-white tracking-tight mb-3">
+            Tu negocio pierde dinero <em className="italic text-zinc-500">mientras duermes.</em>
+          </h2>
           <p className="text-zinc-400 font-light">Cada mensaje sin respuesta es un cliente que se va a la competencia.</p>
         </div>
-        <div className="grid grid-cols-3 divide-x divide-y divide-white/6 border border-white/6 rounded-2xl overflow-hidden">
+        
+        {/* Corrección: Uso de gap-px y fondo para crear la cuadrícula interna en lugar de divide-x/y */}
+        <div className="grid grid-cols-3 gap-px bg-white/6 border border-white/6 rounded-2xl overflow-hidden">
           {PAINS.map((p) => (
             <div key={p.n} className="p-8 bg-[#0A0A0A] hover:bg-[#111] transition-colors flex flex-col gap-3">
               <span className="font-serif text-xs tracking-widest text-white/15">{p.n}</span>
               <div className="w-9 h-9 flex items-center justify-center bg-red-950/30 border border-red-500/20 rounded-lg">
-                <svg className="w-4 h-4 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <svg className="w-4 h-4 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
               </div>
               <p className="text-[15px] font-medium text-white leading-snug">{p.title}</p>
               <p className="text-[13px] text-zinc-500 leading-relaxed font-light">{p.desc}</p>
             </div>
           ))}
         </div>
-        <p className="text-center text-sm text-zinc-600 mt-10"><span className="text-zinc-400 font-medium">¿Te suena familiar?</span> Fluxia resuelve los seis.</p>
+        
+        <p className="text-center text-sm text-zinc-600 mt-10">
+          <span className="text-zinc-400 font-medium">¿Te suena familiar?</span> Fluxia resuelve los seis.
+        </p>
       </div>
     </section>
   );
