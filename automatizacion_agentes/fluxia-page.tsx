@@ -3,6 +3,16 @@
 // Fuentes: Instrument Serif + DM Sans — añadir en layout.tsx o _document.tsx:
 // import { Instrument_Serif, DM_Sans } from 'next/font/google'
 
+//Layout: 
+//import { Instrument_Serif, DM_Sans } from "next/font/google";
+//const serif = Instrument_Serif({ subsets: ["latin"], weight: "400", variable: "--font-serif" });
+//const sans = DM_Sans({ subsets: ["latin"], variable: "--font-sans" });
+//Tailwind.config.ts:
+//fontFamily: { serif: ["var(--font-serif)"], sans: ["var(--font-sans)"] }
+//El archivo va en app/page.tsx o pages/index.tsx según uses App Router o Pages Router.
+//Todo el código está autocontenido: datos, componentes, estados (toggle de precios, tabs de sectores) y todas las secciones de Hero a Footer. Sin dependencias externas más allá de React y Tailwind.
+
+
 "use client";
 import { useState } from "react";
 
