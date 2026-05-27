@@ -1,617 +1,869 @@
-// app/page.tsx  (o pages/index.tsx si usas Pages Router)
-// Stack: Next.js 14 + Tailwind CSS
-// Fuentes: Instrument Serif + DM Sans — añadir en layout.tsx o _document.tsx:
-// import { Instrument_Serif, DM_Sans } from 'next/font/google'
-
-//Layout: 
-//import { Instrument_Serif, DM_Sans } from "next/font/google";
-//const serif = Instrument_Serif({ subsets: ["latin"], weight: "400", variable: "--font-serif" });
-//const sans = DM_Sans({ subsets: ["latin"], variable: "--font-sans" });
-//Tailwind.config.ts:
-//fontFamily: { serif: ["var(--font-serif)"], sans: ["var(--font-sans)"] }
-//El archivo va en app/page.tsx o pages/index.tsx según uses App Router o Pages Router.
-//Todo el código está autocontenido: datos, componentes, estados (toggle de precios, tabs de sectores) y todas las secciones de Hero a Footer. Sin dependencias externas más allá de React y Tailwind.
-
-
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
-// ─── DATOS ────────────────────────────────────────────────────────────────────
+// ─── SVG ICONS (Native, no external libraries) ────────────────────────────────
 
-const PAINS = [
-  { n: "01", title: "Pierdes reservas fuera de horario", desc: "Si no contestas el WhatsApp a las 23h, esa mesa la reserva el restaurante de al lado." },
-  { n: "02", title: "Tu equipo no puede hacer dos cosas a la vez", desc: "Mientras sirven mesas o cortan el pelo, los mensajes se acumulan sin respuesta." },
-  { n: "03", title: "Siempre las mismas preguntas", desc: "Horarios, carta, precios, disponibilidad. Tu equipo las repite decenas de veces al día." },
-  { n: "04", title: "Los clientes no esperan", desc: "Si no reciben respuesta en minutos, buscan otra opción. La inmediatez ya no es un extra." },
-  { n: "05", title: "Reservas gestionadas a mano", desc: "Cuadernos, hojas de Excel, notas de voz. Un error y tienes dos clientes en la misma mesa." },
-  { n: "06", title: "Sin tiempo para crecer", desc: "Estás apagando fuegos todo el día. No hay espacio para marketing, fidelización ni expansión." },
-];
-
-const PILLARS = [
-  {
-    num: "Pilar 01", title: "Atención 24/7",
-    desc: "Un asistente inteligente por WhatsApp que responde, reserva y gestiona sin que nadie intervenga.",
-    feats: ["Responde en segundos, a cualquier hora", "Entiende lenguaje natural, no comandos", "Escala sin límite, sin contratar a nadie"],
-  },
-  {
-    num: "Pilar 02", title: "Reservas automáticas",
-    desc: "El sistema confirma, recuerda y gestiona cancelaciones solo. Sin cuadernos, sin errores.",
-    feats: ["Confirmación instantánea al cliente", "Recordatorio automático 24h antes", "Gestión de cancelaciones y lista de espera"],
-  },
-  {
-    num: "Pilar 03", title: "Tu negocio siempre activo",
-    desc: "Mientras tu equipo se centra en dar el mejor servicio, Fluxia gestiona el resto en segundo plano.",
-    feats: ["Menos tiempo en tareas repetitivas", "Más espacio para crecer y fidelizar", "Sin formación técnica para tu equipo"],
-  },
-];
-
-const STEPS = [
-  { n: "0", opt: true, tag: "Opcional · Solo Fluxia Pro", title: "Tu presencia online", desc: "¿Sin web o necesitas renovarla? La creamos como parte del pack, adaptada a tu negocio.", pill: "Solo con Fluxia Pro" },
-  { n: "1", opt: false, tag: "30 minutos", title: "Cuéntanos tu negocio", desc: "Una llamada de 30 minutos. Analizamos tu negocio y diseñamos el sistema a tu medida." },
-  { n: "2", opt: false, tag: "Tú no haces nada", title: "Configuramos todo", desc: "Nuestro equipo instala y configura Fluxia en tu WhatsApp sin que tengas que intervenir." },
-  { n: "3", opt: false, tag: "Menos de 48 horas", title: "Piloto automático", desc: "Tu asistente ya atiende clientes, gestiona reservas y trabaja por ti las 24 horas." },
-];
-
-const SECTORES = {
-  r: {
-    label: "Restaurantes", title: "Restaurantes", titleItalic: "sin reservas perdidas.",
-    desc: "Tus mesas siempre ocupadas, tu equipo siempre libre para dar el mejor servicio.",
-    feats: ["Reservas automáticas sin intervención del personal", "Gestión de lista de espera en tiempo real", "Respuestas sobre carta, horarios y alergias", "Respuesta automática a reseñas de Google", "Recordatorio al cliente 24h antes"],
-    chat: [
-      { in: true, text: "Hola, ¿tenéis mesa para 2 el viernes por la noche?" },
-      { in: false, text: "¡Hola! Sí. ¿Prefieres a las 20:30 o a las 22:00?" },
-      { in: true, text: "A las 21h si puede ser" },
-      { in: false, text: "Mesa para 2 el viernes a las 21:00 confirmada. Te recuerdo el jueves. ¡Hasta entonces!" },
-    ],
-    ts: "Respondido en 3 segundos · 02:14 AM",
-  },
-  p: {
-    label: "Peluquerías", title: "Peluquerías", titleItalic: "sin huecos vacíos.",
-    desc: "Citas gestionadas solas, no-shows reducidos y clientes que vuelven sin que tengas que llamarlos.",
-    feats: ["Reserva eligiendo empleado y servicio por WhatsApp", "Recordatorio automático 24h antes", "Lista de espera si no hay hueco disponible", "Seguimiento post-visita para fidelizar clientes", "Promociones automáticas a clientes inactivos"],
-    chat: [
-      { in: true, text: "Quiero pedir cita para corte y color con Laura" },
-      { in: false, text: "Laura tiene hueco el jueves a las 11:00 o el sábado a las 10:30. ¿Cuál te viene mejor?" },
-      { in: true, text: "El jueves perfecto" },
-      { in: false, text: "Cita con Laura el jueves a las 11:00 confirmada. Te recuerdo el miércoles. ¡Hasta entonces!" },
-    ],
-    ts: "Respondido en 2 segundos · 11:47 PM",
-  },
-  h: {
-    label: "Hookahs", title: "Hookahs", titleItalic: "sin caos en grupos.",
-    desc: "Grupos grandes, múltiples cabinas, dudas sobre sabores y normas. Todo gestionado antes de que lleguen.",
-    feats: ["Reserva de cabina o zona para grupos por WhatsApp", "Información automática sobre sabores, precios y normas", "Gestión de lista de espera en tiempo real", "Confirmación de asistencia para grupos grandes", "Promociones automáticas para grupos y eventos"],
-    chat: [
-      { in: true, text: "Somos 8 personas el sábado, ¿tenéis cabina?" },
-      { in: false, text: "¡Hola! Sí. El sábado hay hueco a las 21:00 y a las 23:00. ¿Cuál preferís?" },
-      { in: true, text: "A las 21h. ¿Qué sabores tenéis?" },
-      { in: false, text: "Reserva para 8 a las 21:00 confirmada. Os mando la carta de sabores y las normas del local." },
-    ],
-    ts: "Respondido en 4 segundos · 01:32 AM",
-  },
-};
-
-const AUTO_PLANS = [
-  { name: "Starter", monthly: 49, annual: 41, feats: ["WhatsApp bot con IA", "Reservas automáticas", "Respuestas a preguntas frecuentes"], popular: false },
-  { name: "Pro", monthly: 89, annual: 75, feats: ["Todo lo del plan Starter", "Recordatorios automáticos", "Respuesta a reseñas Google"], popular: true },
-  { name: "Elite", monthly: 149, annual: 126, feats: ["Todo lo del plan Pro", "Analytics avanzado", "Soporte prioritario 24/7"], popular: false },
-];
-
-const PRO_PLANS = [
-  { name: "Starter", monthly: 49, annual: 41, setup: "€799", feats: ["Web profesional incluida", "Fluxia Auto Starter", "Dominio y hosting"], popular: false },
-  { name: "Pro", monthly: 89, annual: 75, setup: "€1.199", feats: ["Web premium a medida", "Fluxia Auto Pro completo", "SEO local optimizado"], popular: true },
-  { name: "Elite", monthly: 149, annual: 126, setup: "€1.799", feats: ["Web a medida completa", "Fluxia Auto Elite", "Soporte prioritario 24/7"], popular: false },
-];
-
-// ─── SUB-COMPONENTES ──────────────────────────────────────────────────────────
-
-function CheckIcon() {
+function CheckIcon({ className = "w-5 h-5" }: { className?: string }) {
   return (
-    <svg className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <polyline points="20 6 9 17 4 12" />
     </svg>
   );
 }
 
-function ArrowRight({ className = "" }: { className?: string }) {
+function ArrowRightIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
-    <svg className={`w-4 h-4 ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M5 12h14M12 5l7 7-7 7" />
     </svg>
   );
 }
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
+function BoltIcon({ className = "w-5 h-5" }: { className?: string }) {
   return (
-    <p className="flex items-center gap-2 text-[11px] font-medium tracking-[1.1px] uppercase text-zinc-500 mb-4">
-      <span className="w-5 h-px bg-zinc-600 inline-block" />
-      {children}
-    </p>
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+    </svg>
   );
 }
 
-function PlanCard({ plan, annual, cta }: { plan: typeof AUTO_PLANS[0]; annual: boolean; cta: string }) {
-  const price = annual ? plan.annual : plan.monthly;
+function BrainIcon({ className = "w-5 h-5" }: { className?: string }) {
   return (
-    <div className={`relative rounded-xl p-6 flex flex-col gap-4 border transition-colors ${
-      plan.popular
-        ? "border-emerald-500/30 bg-emerald-950/20"
-        : "border-white/8 bg-white/2"
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z" />
+      <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z" />
+    </svg>
+  );
+}
+
+function RocketIcon({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
+      <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
+      <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
+      <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
+    </svg>
+  );
+}
+
+function SparklesIcon({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" />
+    </svg>
+  );
+}
+
+function MessageIcon({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </svg>
+  );
+}
+
+function CalendarIcon({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+      <line x1="16" x2="16" y1="2" y2="6" />
+      <line x1="8" x2="8" y1="2" y2="6" />
+      <line x1="3" x2="21" y1="10" y2="10" />
+    </svg>
+  );
+}
+
+function DatabaseIcon({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <ellipse cx="12" cy="5" rx="9" ry="3" />
+      <path d="M3 5V19A9 3 0 0 0 21 19V5" />
+      <path d="M3 12A9 3 0 0 0 21 12" />
+    </svg>
+  );
+}
+
+function MenuIcon({ className = "w-6 h-6" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="4" x2="20" y1="12" y2="12" />
+      <line x1="4" x2="20" y1="6" y2="6" />
+      <line x1="4" x2="20" y1="18" y2="18" />
+    </svg>
+  );
+}
+
+function XIcon({ className = "w-6 h-6" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 6 6 18" />
+      <path d="m6 6 12 12" />
+    </svg>
+  );
+}
+
+// ─── HEADER / NAV ─────────────────────────────────────────────────────────────
+
+function Header() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return (
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      scrolled ? 'bg-background/80 backdrop-blur-xl border-b border-border' : 'bg-transparent'
     }`}>
-      {plan.popular && (
-        <span className="absolute top-0 right-4 bg-emerald-600 text-white text-[10px] font-medium px-2.5 py-0.5 rounded-b-md">
-          Más popular
-        </span>
-      )}
-      <p className="text-xs font-medium tracking-wide uppercase text-zinc-400">{plan.name}</p>
-      <div>
-        <p className="text-3xl font-medium text-white tracking-tight">
-          €{price}<span className="text-sm font-normal text-zinc-400">/mes</span>
-        </p>
-        {"setup" in plan && (
-          <p className="text-xs text-zinc-500 mt-0.5">+ {(plan as any).setup} setup único</p>
-        )}
-        <p className="text-xs text-zinc-600 mt-0.5">
-          {annual ? "Facturado anualmente" : "Facturado mensualmente"}
-        </p>
-      </div>
-      <ul className="flex flex-col gap-2">
-        {plan.feats.map((f) => (
-          <li key={f} className="flex items-start gap-2 text-[13px] text-zinc-400">
-            <CheckIcon />{f}
-          </li>
-        ))}
-      </ul>
-      <button className={`mt-auto py-2.5 rounded-lg text-sm font-medium transition-all ${
-        plan.popular
-          ? "bg-emerald-600 text-white hover:bg-emerald-700"
-          : "border border-white/12 text-zinc-400 hover:border-white/25 hover:text-white bg-transparent"
-      }`}>
-        {cta}
-      </button>
-    </div>
-  );
-}
-
-// ─── SECCIONES ────────────────────────────────────────────────────────────────
-
-function Hero() {
-  return (
-    <section className="relative bg-[#0A0A0A] overflow-hidden pb-20">
-      {/* Grid bg */}
-      <div className="absolute inset-0 pointer-events-none"
-        style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px)", backgroundSize: "48px 48px" }} />
-      {/* Glow */}
-      <div className="absolute -top-20 -right-20 w-[500px] h-[400px] pointer-events-none"
-        style={{ background: "radial-gradient(ellipse, rgba(29,158,117,0.12) 0%, transparent 70%)" }} />
-
-      {/* Nav */}
-      <nav className="relative z-10 flex items-center justify-between px-12 py-7">
-        <span className="font-serif text-xl text-white">Flux<span className="text-emerald-500">ia</span></span>
-        <ul className="flex items-center gap-8 list-none">
-          {["Cómo funciona", "Sectores", "Precios"].map((l) => (
-            <li key={l}><a href="#" className="text-sm text-zinc-500 hover:text-white transition-colors no-underline">{l}</a></li>
-          ))}
-          <li>
-            <a href="#contacto" className="text-sm font-medium bg-emerald-600 text-white px-5 py-2 rounded-md hover:bg-emerald-700 transition-colors no-underline">
-              Solicitar demo
-            </a>
-          </li>
-        </ul>
-      </nav>
-
-      {/* Content */}
-      <div className="relative z-10 max-w-3xl mx-auto text-center px-6 pt-20">
-        <div className="inline-flex items-center gap-2 bg-emerald-950/50 border border-emerald-500/25 text-emerald-400 text-[11px] font-medium tracking-widest uppercase px-4 py-1.5 rounded-full mb-9">
-          <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-          Disponible en 48 horas
-        </div>
-        <h1 className="font-serif text-5xl leading-[1.1] tracking-tight text-white mb-6">
-          El sistema que gestiona tu negocio{" "}
-          <em className="italic text-emerald-400">mientras tú lo haces crecer.</em>
-        </h1>
-        <p className="text-[17px] text-zinc-400 leading-relaxed max-w-lg mx-auto mb-12 font-light">
-          Automatización de reservas, atención al cliente y tareas repetitivas vía WhatsApp e IA.
-          Sin complicaciones técnicas, sin contratos, sin excusas.
-        </p>
-        <div className="flex items-center justify-center gap-3 flex-wrap">
-          <a href="#contacto" className="inline-flex items-center gap-2 bg-emerald-600 text-white px-7 py-3.5 rounded-lg text-[15px] font-medium hover:bg-emerald-700 transition-colors no-underline">
-            Solicitar demo gratuita <ArrowRight />
-          </a>
-          <a href="#como-funciona" className="inline-flex items-center gap-2 border border-white/15 text-zinc-400 px-6 py-3.5 rounded-lg text-sm hover:border-white/30 hover:text-white transition-colors no-underline">
-            Ver cómo funciona
-          </a>
-        </div>
-      </div>
-
-      {/* Trust strip */}
-      <div className="relative z-10 flex items-center justify-center gap-10 flex-wrap px-12 pt-14">
-        {["Sin tarjeta de crédito", "14 días de prueba gratuita", "Funcionando en 48 horas", "Solo para negocios en España"].map((t, i) => (
-          <span key={t} className={`flex items-center gap-2 text-xs text-zinc-600 ${i > 0 ? "border-l border-white/8 pl-10" : ""}`}>
-            <CheckIcon />{t}
+      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        <a href="#" className="flex items-center gap-2 group">
+          <span className="text-2xl font-serif tracking-tight text-foreground">
+            Flux<span className="text-emerald-400">ia</span>
           </span>
-        ))}
+          <span className="hidden sm:inline-flex bg-emerald-500/10 text-emerald-400 text-[10px] px-2 py-0.5 rounded-full border border-emerald-500/20 font-medium uppercase tracking-wider">
+            IA Agency
+          </span>
+        </a>
+
+        {/* Desktop Nav */}
+        <nav className="hidden lg:flex items-center gap-8">
+          {['Soluciones', 'Demo IA', 'Planes', 'Contacto'].map((item) => (
+            <a
+              key={item}
+              href={`#${item.toLowerCase().replace(' ', '-')}`}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
+            >
+              {item}
+            </a>
+          ))}
+        </nav>
+
+        <div className="flex items-center gap-4">
+          <a
+            href="#contacto"
+            className="hidden sm:inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-cyan-500 text-background font-semibold text-sm px-5 py-2.5 rounded-lg hover:opacity-90 transition-all duration-200 hover:scale-105"
+          >
+            Agendar Demo
+            <ArrowRightIcon className="w-4 h-4" />
+          </a>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="lg:hidden p-2 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {isMenuOpen ? <XIcon /> : <MenuIcon />}
+          </button>
+        </div>
       </div>
 
-      {/* Chat preview */}
-      <div className="relative z-10 max-w-2xl mx-auto mt-14 bg-white/[0.02] border border-white/8 rounded-xl p-5 flex items-center gap-6">
-        <div className="flex-1 flex flex-col gap-2">
-          <p className="text-xs text-zinc-600 bg-white/5 border border-white/8 rounded-2xl rounded-bl-sm px-3.5 py-2 max-w-[280px]">
-            Hola, quiero reservar mesa para 4 el sábado a las 21h
-          </p>
-          <p className="text-xs text-emerald-400 bg-emerald-950/30 border border-emerald-500/20 rounded-2xl rounded-br-sm px-3.5 py-2 max-w-[300px] self-end">
-            ¡Perfecto! Mesa para 4 el sábado 31 a las 21:00 confirmada. Te enviaré un recordatorio 24h antes 🤖
-          </p>
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <div className="lg:hidden bg-card border-t border-border">
+          <nav className="flex flex-col p-6 gap-4">
+            {['Soluciones', 'Demo IA', 'Planes', 'Contacto'].map((item) => (
+              <a
+                key={item}
+                href={`#${item.toLowerCase().replace(' ', '-')}`}
+                onClick={() => setIsMenuOpen(false)}
+                className="text-foreground py-2 border-b border-border last:border-0"
+              >
+                {item}
+              </a>
+            ))}
+            <a
+              href="#contacto"
+              className="mt-4 flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-cyan-500 text-background font-semibold text-sm px-5 py-3 rounded-lg"
+            >
+              Agendar Demo
+              <ArrowRightIcon className="w-4 h-4" />
+            </a>
+          </nav>
         </div>
-        <div className="flex flex-col gap-3 border-l border-white/8 pl-6 min-w-[130px]">
-          {[["24/7", "Atención sin parar"], ["0 min", "Intervención humana"], ["48 h", "Para estar activo"]].map(([n, l]) => (
-            <div key={l}>
-              <p className="font-serif text-xl text-white leading-none">{n}</p>
-              <p className="text-[11px] text-zinc-600">{l}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
+      )}
+    </header>
   );
 }
 
-function Problema() {
+// ─── HERO SECTION ─────────────────────────────────────────────────────────────
+
+function HeroSection() {
   return (
-    <section className="bg-[#0A0A0A] py-24 px-12 border-t border-white/5">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-16">
-          <SectionLabel>El problema</SectionLabel>
-          <h2 className="font-serif text-4xl text-white tracking-tight mb-3">
-            Tu negocio pierde dinero <em className="italic text-zinc-500">mientras duermes.</em>
-          </h2>
-          <p className="text-zinc-400 font-light">
-            Cada mensaje sin respuesta es un cliente que se va a la competencia.
-          </p>
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden grid-bg">
+      {/* Gradient Orbs */}
+      <div className="absolute top-20 right-10 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[120px] animate-pulse-glow" />
+      <div className="absolute bottom-20 left-10 w-[400px] h-[400px] bg-cyan-500/10 rounded-full blur-[100px] animate-pulse-glow" />
+      
+      <div className="relative z-10 max-w-5xl mx-auto px-6 pt-32 pb-20 text-center">
+        {/* Badge */}
+        <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium tracking-widest uppercase px-4 py-2 rounded-full mb-8">
+          <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+          Sistema activo en 48 horas
         </div>
-        <div className="grid grid-cols-3 divide-x divide-y divide-white/6 border border-white/6 rounded-2xl overflow-hidden">
-          {PAINS.map((p) => (
-            <div key={p.n} className="p-8 bg-[#0A0A0A] hover:bg-[#111] transition-colors flex flex-col gap-3">
-              <span className="font-serif text-xs tracking-widest text-white/15">{p.n}</span>
-              <div className="w-9 h-9 flex items-center justify-center bg-red-950/30 border border-red-500/20 rounded-lg">
-                <svg className="w-4 h-4 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-                </svg>
-              </div>
-              <p className="text-[15px] font-medium text-white leading-snug">{p.title}</p>
-              <p className="text-[13px] text-zinc-500 leading-relaxed font-light">{p.desc}</p>
-            </div>
-          ))}
-        </div>
-        <p className="text-center text-sm text-zinc-600 mt-10">
-          <span className="text-zinc-400 font-medium">¿Te suena familiar?</span> Fluxia resuelve los seis.
+
+        {/* Main Heading */}
+        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-serif tracking-tight text-foreground mb-6 leading-[1.1]">
+          Automatiza tu negocio con{' '}
+          <span className="block mt-2 gradient-text">
+            Agentes de IA
+          </span>
+        </h1>
+
+        {/* Subtitle */}
+        <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
+          Diseñamos, entrenamos e integramos delegados autónomos que optimizan tus operaciones, capturan leads y atienden clientes las 24 horas.
         </p>
-      </div>
-    </section>
-  );
-}
 
-function Solucion() {
-  return (
-    <section className="bg-[#0D0D0D] py-24 px-12 border-t border-white/5">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-16">
-          <SectionLabel>La solución</SectionLabel>
-          <h2 className="font-serif text-4xl text-white tracking-tight mb-3">
-            Tres pilares. <em className="italic text-emerald-400">Un negocio que no para.</em>
-          </h2>
-          <p className="text-zinc-400 font-light max-w-md mx-auto">
-            Fluxia no es una app más. Es el sistema que trabaja por ti las 24 horas, sin que tengas que tocar nada.
-          </p>
-        </div>
-        <div className="grid grid-cols-3 gap-5">
-          {PILLARS.map((p) => (
-            <div key={p.num} className="bg-white/[0.02] border border-white/8 rounded-2xl p-8 flex flex-col gap-5 hover:border-emerald-500/25 transition-colors">
-              <p className="text-[11px] tracking-widest uppercase text-emerald-500/50">{p.num}</p>
-              <div className="w-12 h-12 bg-emerald-950/40 border border-emerald-500/20 rounded-xl flex items-center justify-center">
-                <svg className="w-5 h-5 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
-                </svg>
-              </div>
-              <div>
-                <p className="font-serif text-xl text-white mb-2">{p.title}</p>
-                <p className="text-sm text-zinc-400 leading-relaxed font-light">{p.desc}</p>
-              </div>
-              <ul className="flex flex-col gap-2">
-                {p.feats.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-[13px] text-zinc-500">
-                    <span className="w-1.5 h-1.5 bg-emerald-600/60 rounded-full mt-1.5 flex-shrink-0" />{f}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-        <div className="mt-12 bg-emerald-950/20 border border-emerald-500/18 rounded-xl px-10 py-7 flex items-center justify-between gap-6">
-          <div>
-            <p className="font-serif text-xl text-white">Todo esto, funcionando en menos de 48 horas.</p>
-            <p className="text-sm text-zinc-500 mt-1 font-light">Sin contratos de permanencia. Sin complicaciones técnicas.</p>
-          </div>
-          <a href="#contacto" className="flex-shrink-0 inline-flex items-center gap-2 bg-emerald-600 text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors no-underline">
-            Solicitar demo <ArrowRight />
+        {/* CTA Buttons */}
+        <div className="flex flex-col sm:flex-row justify-center gap-4 mb-16">
+          <a
+            href="#demo-ia"
+            className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-cyan-500 text-background font-bold text-base px-8 py-4 rounded-xl shadow-lg shadow-emerald-500/20 hover:opacity-90 transition-all duration-200 hover:scale-105"
+          >
+            <SparklesIcon className="w-5 h-5" />
+            Probar Demo En Vivo
+          </a>
+          <a
+            href="#soluciones"
+            className="inline-flex items-center justify-center gap-2 bg-card border border-border text-foreground font-medium text-base px-8 py-4 rounded-xl hover:bg-muted transition-all duration-200"
+          >
+            Ver Soluciones
+            <ArrowRightIcon className="w-4 h-4" />
           </a>
         </div>
+
+        {/* Stats */}
+        <div className="flex flex-wrap justify-center gap-8 sm:gap-12 text-center">
+          {[
+            { value: '24/7', label: 'Atención continua' },
+            { value: '< 5s', label: 'Tiempo respuesta' },
+            { value: '99.9%', label: 'Uptime garantizado' },
+          ].map((stat) => (
+            <div key={stat.label} className="px-4">
+              <p className="text-3xl sm:text-4xl font-serif gradient-text mb-1">{stat.value}</p>
+              <p className="text-sm text-muted-foreground">{stat.label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Scroll indicator */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+        <div className="w-6 h-10 border-2 border-muted-foreground/30 rounded-full flex items-start justify-center p-2">
+          <div className="w-1.5 h-2 bg-emerald-400 rounded-full animate-pulse" />
+        </div>
       </div>
     </section>
   );
 }
 
-function ComoFunciona() {
+// ─── FEATURES / NODES SECTION ─────────────────────────────────────────────────
+
+const NODES = [
+  {
+    id: 1,
+    icon: BoltIcon,
+    title: 'Nodo de Activación',
+    subtitle: 'Trigger',
+    description: 'Detecta eventos en tiempo real: un email entrante, un nuevo mensaje en WhatsApp o un lead registrado en tu CRM.',
+    color: 'emerald',
+  },
+  {
+    id: 2,
+    icon: BrainIcon,
+    title: 'Cerebro de Procesamiento',
+    subtitle: 'LLM Core',
+    description: 'El agente interpreta la intención del usuario usando modelos de lenguaje avanzados, extrayendo datos clave.',
+    color: 'cyan',
+  },
+  {
+    id: 3,
+    icon: RocketIcon,
+    title: 'Nodo de Acción',
+    subtitle: 'Execution',
+    description: 'Ejecuta tareas reales: agenda reuniones en Calendly, actualiza bases de datos o envía presupuestos automáticos.',
+    color: 'teal',
+  },
+];
+
+function FeaturesSection() {
+  const [hoveredNode, setHoveredNode] = useState<number | null>(null);
+
+  const getColorClasses = (color: string, isHovered: boolean) => {
+    const colors: Record<string, { bg: string; border: string; text: string; glow: string }> = {
+      emerald: {
+        bg: isHovered ? 'bg-emerald-500/20' : 'bg-emerald-500/10',
+        border: isHovered ? 'border-emerald-500/50' : 'border-emerald-500/20',
+        text: 'text-emerald-400',
+        glow: 'shadow-emerald-500/20',
+      },
+      cyan: {
+        bg: isHovered ? 'bg-cyan-500/20' : 'bg-cyan-500/10',
+        border: isHovered ? 'border-cyan-500/50' : 'border-cyan-500/20',
+        text: 'text-cyan-400',
+        glow: 'shadow-cyan-500/20',
+      },
+      teal: {
+        bg: isHovered ? 'bg-teal-500/20' : 'bg-teal-500/10',
+        border: isHovered ? 'border-teal-500/50' : 'border-teal-500/20',
+        text: 'text-teal-400',
+        glow: 'shadow-teal-500/20',
+      },
+    };
+    return colors[color] || colors.emerald;
+  };
+
   return (
-    <section id="como-funciona" className="bg-[#0A0A0A] py-24 px-12 border-t border-white/5">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-16">
-          <SectionLabel>Cómo funciona</SectionLabel>
-          <h2 className="font-serif text-4xl text-white tracking-tight mb-3">
-            En marcha en <em className="italic text-emerald-400">cuatro pasos.</em>
+    <section id="soluciones" className="relative py-32 px-6">
+      <div className="max-w-6xl mx-auto">
+        {/* Section Header */}
+        <div className="text-center mb-20">
+          <p className="text-xs font-medium tracking-[3px] uppercase text-emerald-400 mb-4">
+            Arquitectura Inteligente
+          </p>
+          <h2 className="text-4xl sm:text-5xl font-serif text-foreground mb-4">
+            Estructura de Flujo{' '}
+            <span className="gradient-text">Inteligente</span>
           </h2>
-          <p className="text-zinc-400 font-light max-w-md mx-auto">
-            Sin reuniones eternas ni equipos técnicos. De la llamada inicial a tu negocio automatizado en menos de 48 horas.
+          <p className="text-muted-foreground max-w-lg mx-auto">
+            Nuestros agentes no son simples bots; se estructuran mediante arquitecturas de nodos lógicos interconectados.
           </p>
         </div>
-        <div className="grid grid-cols-4 relative">
-          <div className="absolute top-[22px] left-[13%] right-[13%] h-px bg-emerald-500/20" />
-          {STEPS.map((s, i) => (
-            <div key={s.n} className={`flex flex-col gap-4 px-5 relative z-10 ${i < STEPS.length - 1 ? "border-r border-white/5" : ""} ${i === 0 ? "pl-0" : ""} ${i === STEPS.length - 1 ? "pr-0" : ""}`}>
-              <div className={`w-11 h-11 rounded-full flex items-center justify-center text-base font-medium ${
-                s.opt
-                  ? "bg-white/4 border border-white/10 text-zinc-600"
-                  : "bg-emerald-950/40 border border-emerald-500/30 text-emerald-400"
-              }`}>{s.n}</div>
-              <div>
-                <p className="text-[11px] tracking-wider uppercase text-zinc-600 mb-1">{s.tag}</p>
-                <p className="text-[15px] font-medium text-white mb-2">{s.title}</p>
-                <p className="text-[13px] text-zinc-500 leading-relaxed font-light">{s.desc}</p>
-                {s.pill && <span className="mt-2 inline-block text-[11px] px-2.5 py-0.5 rounded-full bg-white/4 border border-white/8 text-zinc-600">{s.pill}</span>}
+
+        {/* Nodes Grid */}
+        <div className="grid md:grid-cols-3 gap-6">
+          {NODES.map((node) => {
+            const isHovered = hoveredNode === node.id;
+            const colors = getColorClasses(node.color, isHovered);
+            const Icon = node.icon;
+
+            return (
+              <div
+                key={node.id}
+                onMouseEnter={() => setHoveredNode(node.id)}
+                onMouseLeave={() => setHoveredNode(null)}
+                className={`relative bg-card border ${colors.border} rounded-2xl p-8 transition-all duration-300 hover:scale-105 ${
+                  isHovered ? `shadow-xl ${colors.glow}` : ''
+                }`}
+              >
+                {/* Node Number */}
+                <div className={`absolute top-4 right-4 w-8 h-8 rounded-lg ${colors.bg} ${colors.border} border flex items-center justify-center ${colors.text} text-sm font-bold`}>
+                  {node.id}
+                </div>
+
+                {/* Icon */}
+                <div className={`w-14 h-14 rounded-xl ${colors.bg} border ${colors.border} flex items-center justify-center mb-6 transition-all duration-300 ${
+                  isHovered ? 'scale-110' : ''
+                }`}>
+                  <Icon className={`w-7 h-7 ${colors.text}`} />
+                </div>
+
+                {/* Content */}
+                <p className={`text-xs font-medium tracking-wider uppercase ${colors.text} mb-2`}>
+                  {node.subtitle}
+                </p>
+                <h3 className="text-xl font-semibold text-foreground mb-3">
+                  {node.title}
+                </h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  {node.description}
+                </p>
+
+                {/* Connection Line (visual) */}
+                {node.id < 3 && (
+                  <div className="hidden md:block absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-px bg-gradient-to-r from-border to-transparent z-10" />
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
   );
 }
 
-function Productos() {
-  return (
-    <section className="bg-[#0D0D0D] py-24 px-12 border-t border-white/5">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-16">
-          <SectionLabel>Productos</SectionLabel>
-          <h2 className="font-serif text-4xl text-white tracking-tight mb-3">
-            Elige el pack <em className="italic text-emerald-400">que necesitas.</em>
-          </h2>
-          <p className="text-zinc-400 font-light">Solo automatización, o el pack completo con web incluida.</p>
-        </div>
-        <div className="grid grid-cols-2 gap-5">
-          {[
-            {
-              badge: "Solo automatización", badgeCls: "bg-white/5 border-white/10 text-zinc-400",
-              name: "Fluxia Auto", tagline: "Para negocios que ya tienen web o no la necesitan.",
-              feats: ["Asistente WhatsApp con IA 24/7", "Reservas y confirmaciones automáticas", "Recordatorios y gestión de cancelaciones", "Respuestas a preguntas frecuentes", "Respuesta automática a reseñas de Google"],
-              from: "Desde", price: "€49", period: "/mes", featured: false, cta: "Ver planes Auto",
-            },
-            {
-              badge: "⭐ Pack completo", badgeCls: "bg-emerald-950/40 border-emerald-500/25 text-emerald-400",
-              name: "Fluxia Pro", tagline: "Web profesional + automatización + IA. Todo en uno.",
-              feats: ["Todo lo de Fluxia Auto incluido", "Web profesional diseñada para tu negocio", "Dominio y hosting incluidos", "SEO local optimizado", "Integración web + WhatsApp unificada"],
-              from: "Setup desde", price: "€799", period: " + €49/mes", featured: true, cta: "Ver planes Pro",
-            },
-          ].map((p) => (
-            <div key={p.name} className={`rounded-2xl p-10 border flex flex-col gap-5 ${p.featured ? "bg-emerald-950/10 border-emerald-500/20" : "bg-white/[0.02] border-white/8"}`}>
-              <span className={`inline-block text-[11px] font-medium px-3 py-1 rounded-full border w-fit ${p.badgeCls}`}>{p.badge}</span>
-              <div>
-                <p className="text-2xl font-medium text-white">{p.name}</p>
-                <p className="text-sm text-zinc-500 mt-1 font-light">{p.tagline}</p>
-              </div>
-              <ul className="flex flex-col gap-2.5">
-                {p.feats.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-[13.5px] text-zinc-400"><CheckIcon />{f}</li>
-                ))}
-              </ul>
-              <div className="mt-auto pt-5 border-t border-white/6">
-                <p className="text-[11px] uppercase tracking-wider text-zinc-600">{p.from}</p>
-                <p className="text-3xl font-medium text-white tracking-tight">{p.price}<span className="text-sm font-normal text-zinc-400">{p.period}</span></p>
-              </div>
-              <button className={`w-full py-3 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-all ${
-                p.featured ? "bg-emerald-600 text-white hover:bg-emerald-700" : "border border-white/15 text-zinc-400 hover:border-white/25 hover:text-white bg-transparent"
-              }`}>
-                {p.cta} <ArrowRight />
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
+// ─── INTERACTIVE CHAT DEMO ────────────────────────────────────────────────────
+
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  text: string;
 }
 
-function Sectores() {
-  const [tab, setTab] = useState<"r" | "p" | "h">("r");
-  const s = SECTORES[tab];
+const SAMPLE_QUESTIONS = [
+  {
+    question: '¿Cómo automatizo la entrada de leads?',
+    answer: 'Conectamos un webhook a tus canales de entrada (Meta Ads, Web). La IA lee cada solicitud, califica el lead según tus criterios en menos de 5 segundos, lo introduce filtrado en tu CRM y envía un aviso inmediato por Slack o email a tu equipo.',
+  },
+  {
+    question: '¿Se puede conectar con mi calendario?',
+    answer: 'Por supuesto. El agente analiza la disponibilidad real de tu equipo mediante integraciones con Google Calendar o Calendly, y gestiona de forma autónoma la conversación con el cliente para cerrar el día y hora que mejor convenga a ambas partes.',
+  },
+  {
+    question: '¿Qué pasa si el agente no sabe responder?',
+    answer: 'El sistema detecta automáticamente consultas fuera de su dominio de conocimiento. En estos casos, escala la conversación a un agente humano de tu equipo via Slack, WhatsApp o email, adjuntando todo el contexto de la conversación.',
+  },
+];
+
+function ChatDemoSection() {
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    { role: 'assistant', text: '¡Hola! Soy el agente inteligente de Fluxia. ¿Qué proceso de tu negocio te gustaría automatizar hoy?' },
+  ]);
+  const [isTyping, setIsTyping] = useState(false);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  const handleQuestionClick = (question: string, answer: string) => {
+    if (isTyping) return;
+
+    // Add user message
+    setMessages((prev) => [...prev, { role: 'user', text: question }]);
+    setIsTyping(true);
+
+    // Scroll to bottom
+    setTimeout(() => {
+      chatContainerRef.current?.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
+    }, 100);
+
+    // Simulate AI response after delay
+    setTimeout(() => {
+      setMessages((prev) => [...prev, { role: 'assistant', text: answer }]);
+      setIsTyping(false);
+
+      // Scroll to bottom again
+      setTimeout(() => {
+        chatContainerRef.current?.scrollTo({
+          top: chatContainerRef.current.scrollHeight,
+          behavior: 'smooth',
+        });
+      }, 100);
+    }, 1500);
+  };
+
   return (
-    <section className="bg-[#0A0A0A] py-24 px-12 border-t border-white/5">
+    <section id="demo-ia" className="relative py-32 px-6 bg-card/50">
       <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-16">
-          <SectionLabel>Sectores</SectionLabel>
-          <h2 className="font-serif text-4xl text-white tracking-tight mb-3">
-            Hecho para <em className="italic text-emerald-400">tu tipo de negocio.</em>
+        {/* Section Header */}
+        <div className="text-center mb-12">
+          <p className="text-xs font-medium tracking-[3px] uppercase text-cyan-400 mb-4">
+            Demo Interactiva
+          </p>
+          <h2 className="text-4xl sm:text-5xl font-serif text-foreground mb-4">
+            Interactúa con{' '}
+            <span className="gradient-text">Nuestro Agente</span>
           </h2>
-          <p className="text-zinc-400 font-light">Cada sector tiene sus propios flujos. Fluxia se adapta desde el primer día.</p>
+          <p className="text-muted-foreground">
+            Haz clic en una pregunta para ver cómo razona e interactúa la IA en tiempo real.
+          </p>
         </div>
-        <div className="flex gap-1 bg-white/3 border border-white/8 rounded-lg p-1 w-fit mb-7">
-          {(["r", "p", "h"] as const).map((k) => (
-            <button key={k} onClick={() => setTab(k)}
-              className={`px-5 py-2 rounded-md text-sm font-medium transition-all cursor-pointer border ${
-                tab === k ? "bg-emerald-950/40 border-emerald-500/25 text-emerald-400" : "bg-transparent border-transparent text-zinc-500 hover:text-zinc-300"
-              }`}>
-              {SECTORES[k].label}
-            </button>
-          ))}
-        </div>
-        <div className="grid grid-cols-2 gap-7">
-          <div>
-            <p className="font-serif text-3xl text-white leading-snug mb-2">
-              {s.title}<br /><em className="italic text-emerald-400">{s.titleItalic}</em>
+
+        {/* Chat Window */}
+        <div className="bg-background border border-border rounded-2xl overflow-hidden shadow-2xl shadow-black/20">
+          {/* Terminal Header */}
+          <div className="bg-card border-b border-border px-4 py-3 flex items-center gap-3">
+            <div className="flex gap-2">
+              <div className="w-3 h-3 rounded-full bg-red-500/60" />
+              <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
+              <div className="w-3 h-3 rounded-full bg-green-500/60" />
+            </div>
+            <span className="text-xs text-muted-foreground font-mono ml-4">
+              fluxia-agent-terminal v2.0.0
+            </span>
+            <div className="ml-auto flex items-center gap-2">
+              <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+              <span className="text-xs text-emerald-400">En línea</span>
+            </div>
+          </div>
+
+          {/* Chat Messages */}
+          <div
+            ref={chatContainerRef}
+            className="p-6 min-h-[350px] max-h-[400px] overflow-y-auto space-y-4"
+          >
+            {messages.map((msg, idx) => (
+              <div
+                key={idx}
+                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-300`}
+              >
+                <div
+                  className={`max-w-[80%] rounded-2xl px-5 py-3 text-sm leading-relaxed ${
+                    msg.role === 'user'
+                      ? 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-background font-medium rounded-br-sm'
+                      : 'bg-card border border-border text-foreground rounded-bl-sm'
+                  }`}
+                >
+                  {msg.text}
+                </div>
+              </div>
+            ))}
+            {isTyping && (
+              <div className="flex justify-start">
+                <div className="bg-card border border-border text-muted-foreground max-w-[80%] rounded-2xl rounded-bl-sm px-5 py-3 text-sm flex items-center gap-2">
+                  <span className="flex gap-1">
+                    <span className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <span className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <span className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  </span>
+                  <span className="ml-2">Fluxia está pensando...</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Sample Questions */}
+          <div className="p-4 bg-card/80 border-t border-border">
+            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-3">
+              Preguntas frecuentes:
             </p>
-            <p className="text-sm text-zinc-400 font-light leading-relaxed mb-5">{s.desc}</p>
-            <ul className="flex flex-col gap-2.5">
-              {s.feats.map((f) => (
-                <li key={f} className="flex items-start gap-2.5 text-[13.5px] text-zinc-400"><CheckIcon />{f}</li>
+            <div className="flex flex-col sm:flex-row gap-2">
+              {SAMPLE_QUESTIONS.map((q, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleQuestionClick(q.question, q.answer)}
+                  disabled={isTyping}
+                  className={`flex-1 text-left text-xs bg-background border border-border text-muted-foreground p-3 rounded-lg transition-all duration-200 ${
+                    isTyping
+                      ? 'opacity-50 cursor-not-allowed'
+                      : 'hover:border-emerald-500/40 hover:text-foreground hover:bg-emerald-500/5'
+                  }`}
+                >
+                  <span className="text-emerald-400 mr-1">→</span> {q.question}
+                </button>
               ))}
-            </ul>
-          </div>
-          <div className="bg-white/[0.02] border border-white/8 rounded-xl p-5 flex flex-col gap-2.5">
-            <p className="text-[11px] tracking-widest uppercase text-zinc-600 mb-1">Ejemplo real</p>
-            {s.chat.map((m, i) => (
-              <p key={i} className={`text-[13px] px-3.5 py-2 rounded-2xl max-w-[86%] leading-snug ${
-                m.in
-                  ? "bg-white/5 border border-white/8 text-zinc-400 self-start rounded-bl-sm"
-                  : "bg-emerald-950/30 border border-emerald-500/20 text-emerald-400 self-end rounded-br-sm"
-              }`}>{m.text}</p>
-            ))}
-            <p className="text-[11px] text-zinc-700 text-right mt-1">{s.ts}</p>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Precios() {
-  const [annual, setAnnual] = useState(false);
-  return (
-    <section className="bg-[#0D0D0D] py-24 px-12 border-t border-white/5">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-14">
-          <SectionLabel>Precios</SectionLabel>
-          <h2 className="font-serif text-4xl text-white tracking-tight mb-3">
-            Claro, sin <em className="italic text-emerald-400">letra pequeña.</em>
-          </h2>
-          <p className="text-zinc-400 font-light">14 días de prueba gratuita. Sin tarjeta de crédito. Sin permanencia.</p>
-        </div>
-        {/* Toggle */}
-        <div className="flex items-center justify-center gap-3 mb-12">
-          <span className={`text-sm transition-colors ${!annual ? "text-white font-medium" : "text-zinc-500"}`}>Mensual</span>
-          <button onClick={() => setAnnual(!annual)}
-            className={`relative w-11 h-6 rounded-full border transition-all cursor-pointer ${annual ? "bg-emerald-600 border-emerald-500" : "bg-white/5 border-white/15"}`}>
-            <span className={`absolute top-[3px] w-[18px] h-[18px] bg-white rounded-full transition-all ${annual ? "left-[22px]" : "left-[3px]"}`} />
-          </button>
-          <span className={`text-sm transition-colors ${annual ? "text-white font-medium" : "text-zinc-500"}`}>Anual</span>
-          <span className="text-[11px] bg-emerald-950/40 border border-emerald-500/25 text-emerald-400 px-2.5 py-0.5 rounded-full">–15%</span>
-        </div>
-        {/* Auto */}
-        <p className="text-xs tracking-widest uppercase text-zinc-600 mb-3">Fluxia Auto — Solo automatización</p>
-        <div className="grid grid-cols-3 gap-3 mb-12">
-          {AUTO_PLANS.map((p) => <PlanCard key={p.name} plan={p} annual={annual} cta="Empezar gratis" />)}
-        </div>
-        {/* Pro */}
-        <p className="text-xs tracking-widest uppercase text-zinc-600 mb-3">Fluxia Pro — Web + Automatización</p>
-        <div className="grid grid-cols-3 gap-3">
-          {PRO_PLANS.map((p) => <PlanCard key={p.name} plan={p} annual={annual} cta="Solicitar demo" />)}
-        </div>
-        <p className="text-center text-sm text-zinc-600 mt-5">
-          <span className="text-zinc-400 font-medium">14 días de prueba gratuita</span> en todos los planes. Sin tarjeta de crédito.
-        </p>
-      </div>
-    </section>
-  );
-}
-
-function Contacto() {
-  return (
-    <section id="contacto" className="bg-[#0A0A0A] py-24 px-12 border-t border-white/5">
-      <div className="max-w-4xl mx-auto grid grid-cols-2 gap-16">
-        <div>
-          <h2 className="font-serif text-[32px] font-normal text-white leading-snug tracking-tight mb-3">
-            ¿Listo para <em className="italic text-emerald-400">dejar de perder reservas?</em>
-          </h2>
-          <p className="text-sm text-zinc-400 font-light leading-relaxed mb-7">
-            Cuéntanos tu negocio y en menos de 24 horas te preparamos una demo personalizada. Sin compromiso, sin tecnicismos.
-          </p>
-          <ul className="flex flex-col gap-3">
-            {[
-              { icon: "phone", text: "+34 600 000 000" },
-              { icon: "mail", text: "hola@fluxia.es" },
-              { icon: "whatsapp", text: "WhatsApp directo disponible" },
-            ].map((c) => (
-              <li key={c.text} className="flex items-center gap-3 text-[13.5px] text-zinc-400">
-                <svg className="w-4 h-4 text-emerald-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <circle cx="12" cy="12" r="10"/>
-                </svg>
-                {c.text}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <form className="flex flex-col gap-3" onSubmit={(e) => e.preventDefault()}>
-          {[
-            { label: "Nombre del negocio", type: "text", placeholder: "Restaurante La Mar…" },
-            { label: "Tu nombre", type: "text", placeholder: "María García" },
-            { label: "WhatsApp o email", type: "text", placeholder: "+34 600 000 000" },
-          ].map((f) => (
-            <div key={f.label} className="flex flex-col gap-1.5">
-              <label className="text-xs text-zinc-600">{f.label}</label>
-              <input type={f.type} placeholder={f.placeholder}
-                className="bg-white/3 border border-white/12 rounded-lg px-4 py-2.5 text-sm text-white placeholder-zinc-700 outline-none focus:border-emerald-500/40 transition-colors" />
             </div>
-          ))}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs text-zinc-600">Sector</label>
-            <select className="bg-white/3 border border-white/12 rounded-lg px-4 py-2.5 text-sm text-zinc-400 outline-none focus:border-emerald-500/40 transition-colors appearance-none cursor-pointer">
-              <option value="">¿A qué te dedicas?</option>
-              <option>Restaurante</option>
-              <option>Peluquería</option>
-              <option>Hookah</option>
-              <option>Otro</option>
-            </select>
           </div>
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs text-zinc-600">¿Qué quieres automatizar? (opcional)</label>
-            <textarea rows={3} placeholder="Cuéntanos cómo gestionas ahora las reservas…"
-              className="bg-white/3 border border-white/12 rounded-lg px-4 py-2.5 text-sm text-white placeholder-zinc-700 outline-none focus:border-emerald-500/40 transition-colors resize-none leading-relaxed" />
-          </div>
-          <button type="submit" className="mt-1 w-full bg-emerald-600 text-white py-3.5 rounded-lg text-[15px] font-medium flex items-center justify-center gap-2 hover:bg-emerald-700 transition-colors cursor-pointer border-none">
-            Solicitar demo gratuita <ArrowRight />
-          </button>
-        </form>
+        </div>
       </div>
     </section>
   );
 }
+
+// ─── PRICING SECTION ──────────────────────────────────────────────────────────
+
+const PLANS = [
+  {
+    name: 'Growth',
+    description: 'Para agencias y profesionales que quieren delegar tareas repetitivas.',
+    monthlyPrice: 499,
+    annualPrice: 399,
+    features: [
+      'Hasta 2 agentes de IA activos',
+      'Integración con 3 herramientas (CRM, Email)',
+      'Soporte técnico por correo',
+      '5.000 interacciones/mes',
+    ],
+    popular: false,
+    cta: 'Comenzar Ahora',
+  },
+  {
+    name: 'Enterprise Scale',
+    description: 'Para empresas que buscan una infraestructura automatizada total.',
+    monthlyPrice: 999,
+    annualPrice: 799,
+    features: [
+      'Agentes de IA ilimitados',
+      'Flujos complejos multinodo y webhooks',
+      'Soporte prioritario 24/7 vía Slack',
+      'Mantenimiento y optimización mensual',
+      'Integración con cualquier herramienta',
+      'SLA garantizado 99.9%',
+    ],
+    popular: true,
+    cta: 'Hablar con Experto',
+  },
+];
+
+function PricingSection() {
+  const [isAnnual, setIsAnnual] = useState(false);
+
+  return (
+    <section id="planes" className="relative py-32 px-6">
+      <div className="max-w-5xl mx-auto">
+        {/* Section Header */}
+        <div className="text-center mb-12">
+          <p className="text-xs font-medium tracking-[3px] uppercase text-emerald-400 mb-4">
+            Planes de Inversión
+          </p>
+          <h2 className="text-4xl sm:text-5xl font-serif text-foreground mb-4">
+            Escoge el nivel de{' '}
+            <span className="gradient-text">automatización</span>
+          </h2>
+          <p className="text-muted-foreground max-w-lg mx-auto">
+            Transparente, sin letra pequeña. Cancela cuando quieras.
+          </p>
+        </div>
+
+        {/* Toggle Switch */}
+        <div className="flex items-center justify-center gap-4 mb-12">
+          <span className={`text-sm transition-colors ${!isAnnual ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+            Mensual
+          </span>
+          
+          <button
+            onClick={() => setIsAnnual(!isAnnual)}
+            className="relative w-14 h-7 rounded-full border border-border bg-card transition-all duration-300 hover:border-emerald-500/40"
+          >
+            <span
+              className={`absolute top-1 w-5 h-5 rounded-full transition-all duration-300 ${
+                isAnnual
+                  ? 'left-8 bg-gradient-to-r from-emerald-500 to-cyan-500'
+                  : 'left-1 bg-muted-foreground'
+              }`}
+            />
+          </button>
+
+          <span className={`text-sm transition-colors ${isAnnual ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+            Anual
+          </span>
+          
+          <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded-full border border-emerald-500/20 font-mono font-bold">
+            -20%
+          </span>
+        </div>
+
+        {/* Pricing Cards */}
+        <div className="grid md:grid-cols-2 gap-8">
+          {PLANS.map((plan) => {
+            const price = isAnnual ? plan.annualPrice : plan.monthlyPrice;
+            
+            return (
+              <div
+                key={plan.name}
+                className={`relative rounded-3xl p-8 flex flex-col transition-all duration-300 hover:scale-[1.02] ${
+                  plan.popular
+                    ? 'bg-gradient-to-b from-emerald-500/10 to-cyan-500/5 border-2 border-emerald-500/30 shadow-xl shadow-emerald-500/10'
+                    : 'bg-card border border-border hover:border-muted'
+                }`}
+              >
+                {/* Popular Badge */}
+                {plan.popular && (
+                  <span className="absolute top-0 right-8 -translate-y-1/2 bg-gradient-to-r from-emerald-500 to-cyan-500 text-background text-[11px] font-bold tracking-wider uppercase px-4 py-1.5 rounded-full">
+                    Más Recomendado
+                  </span>
+                )}
+
+                {/* Plan Info */}
+                <div className="mb-6">
+                  <h3 className="text-2xl font-bold text-foreground mb-2">{plan.name}</h3>
+                  <p className="text-muted-foreground text-sm">{plan.description}</p>
+                </div>
+
+                {/* Price */}
+                <div className="mb-8">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-5xl font-bold text-foreground">{price}€</span>
+                    <span className="text-muted-foreground text-sm">/ mes</span>
+                  </div>
+                  {isAnnual && (
+                    <p className="text-xs text-emerald-400 mt-1">
+                      Facturado anualmente ({price * 12}€/año)
+                    </p>
+                  )}
+                </div>
+
+                {/* Features */}
+                <ul className="space-y-4 mb-8 flex-grow">
+                  {plan.features.map((feature) => (
+                    <li key={feature} className="flex items-start gap-3 text-sm text-muted-foreground">
+                      <CheckIcon className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                {/* CTA Button */}
+                <a
+                  href="#contacto"
+                  className={`text-center font-semibold py-4 rounded-xl transition-all duration-200 hover:scale-105 ${
+                    plan.popular
+                      ? 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-background shadow-lg shadow-emerald-500/20'
+                      : 'bg-muted text-foreground hover:bg-muted/80'
+                  }`}
+                >
+                  {plan.cta}
+                </a>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── CONTACT SECTION ──────────────────────────────────────────────────────────
+
+function ContactSection() {
+  const [formState, setFormState] = useState({
+    negocio: '',
+    nombre: '',
+    contacto: '',
+    sector: '',
+    mensaje: '',
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Form submission logic would go here
+    console.log('[v0] Form submitted:', formState);
+  };
+
+  return (
+    <section id="contacto" className="relative py-32 px-6 bg-card/50">
+      <div className="max-w-5xl mx-auto">
+        <div className="grid lg:grid-cols-2 gap-16">
+          {/* Left Column - Info */}
+          <div>
+            <p className="text-xs font-medium tracking-[3px] uppercase text-emerald-400 mb-4">
+              Contacto
+            </p>
+            <h2 className="text-4xl sm:text-5xl font-serif text-foreground mb-6 leading-tight">
+              ¿Listo para{' '}
+              <span className="gradient-text">automatizar</span>
+              <br />tu negocio?
+            </h2>
+            <p className="text-muted-foreground mb-8 leading-relaxed">
+              Cuéntanos tu negocio y en menos de 24 horas te preparamos una demo personalizada. Sin compromiso, sin tecnicismos.
+            </p>
+
+            {/* Contact Info */}
+            <div className="space-y-4">
+              {[
+                { icon: MessageIcon, label: 'WhatsApp disponible', value: '+34 600 000 000' },
+                { icon: CalendarIcon, label: 'Agenda una llamada', value: 'calendly.com/fluxia' },
+                { icon: DatabaseIcon, label: 'Email directo', value: 'hola@fluxia.es' },
+              ].map((item) => (
+                <div key={item.label} className="flex items-center gap-4 p-4 bg-card border border-border rounded-xl hover:border-emerald-500/30 transition-colors">
+                  <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                    <item.icon className="w-5 h-5 text-emerald-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">{item.label}</p>
+                    <p className="text-foreground font-medium">{item.value}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Right Column - Form */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {[
+              { name: 'negocio', label: 'Nombre del negocio', placeholder: 'Restaurante La Mar...', type: 'text' },
+              { name: 'nombre', label: 'Tu nombre', placeholder: 'María García', type: 'text' },
+              { name: 'contacto', label: 'WhatsApp o email', placeholder: '+34 600 000 000', type: 'text' },
+            ].map((field) => (
+              <div key={field.name}>
+                <label className="text-xs text-muted-foreground font-medium mb-2 block">
+                  {field.label}
+                </label>
+                <input
+                  type={field.type}
+                  placeholder={field.placeholder}
+                  value={formState[field.name as keyof typeof formState]}
+                  onChange={(e) => setFormState({ ...formState, [field.name]: e.target.value })}
+                  className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-emerald-500/50 transition-colors"
+                />
+              </div>
+            ))}
+
+            {/* Sector Select */}
+            <div>
+              <label className="text-xs text-muted-foreground font-medium mb-2 block">
+                Sector
+              </label>
+              <select
+                value={formState.sector}
+                onChange={(e) => setFormState({ ...formState, sector: e.target.value })}
+                className="w-full bg-background border border-border rounded-xl px-4 py-3 text-muted-foreground outline-none focus:border-emerald-500/50 transition-colors appearance-none cursor-pointer"
+              >
+                <option value="">¿A qué te dedicas?</option>
+                <option value="restaurante">Restaurante</option>
+                <option value="peluqueria">Peluquería</option>
+                <option value="ecommerce">E-commerce</option>
+                <option value="saas">SaaS / Tech</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
+
+            {/* Message */}
+            <div>
+              <label className="text-xs text-muted-foreground font-medium mb-2 block">
+                ¿Qué quieres automatizar? (opcional)
+              </label>
+              <textarea
+                rows={4}
+                placeholder="Cuéntanos cómo gestionas ahora las tareas que quieres automatizar..."
+                value={formState.mensaje}
+                onChange={(e) => setFormState({ ...formState, mensaje: e.target.value })}
+                className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-emerald-500/50 transition-colors resize-none"
+              />
+            </div>
+
+            {/* Submit */}
+            <button
+              type="submit"
+              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-cyan-500 text-background font-bold py-4 rounded-xl shadow-lg shadow-emerald-500/20 hover:opacity-90 transition-all duration-200 hover:scale-[1.02]"
+            >
+              Solicitar Demo Gratuita
+              <ArrowRightIcon className="w-5 h-5" />
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── FOOTER ───────────────────────────────────────────────────────────────────
 
 function Footer() {
   return (
-    <footer className="bg-[#070707] border-t border-white/5 px-12 py-8 flex items-center justify-between">
-      <span className="font-serif text-lg text-white">Flux<span className="text-emerald-500">ia</span></span>
-      <div className="flex gap-6">
-        {["Aviso legal", "Privacidad", "Cookies", "Contacto"].map((l) => (
-          <a key={l} href="#" className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors no-underline">{l}</a>
-        ))}
+    <footer className="border-t border-border py-12 px-6">
+      <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+        {/* Logo */}
+        <span className="text-xl font-serif text-foreground">
+          Flux<span className="text-emerald-400">ia</span>
+        </span>
+
+        {/* Links */}
+        <div className="flex items-center gap-6">
+          {['Aviso legal', 'Privacidad', 'Cookies'].map((link) => (
+            <a
+              key={link}
+              href="#"
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {link}
+            </a>
+          ))}
+        </div>
+
+        {/* Copyright */}
+        <p className="text-xs text-muted-foreground">
+          © {new Date().getFullYear()} Fluxia Agency. Todos los derechos reservados.
+        </p>
       </div>
-      <p className="text-xs text-zinc-700">© 2025 Fluxia. Todos los derechos reservados.</p>
     </footer>
   );
 }
 
-// ─── PAGE ─────────────────────────────────────────────────────────────────────
+// ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 
 export default function FluxiaPage() {
   return (
-    <main className="min-h-screen font-sans">
-      <Hero />
-      <Problema />
-      <Solucion />
-      <ComoFunciona />
-      <Productos />
-      <Sectores />
-      <Precios />
-      <Contacto />
+    <main className="min-h-screen bg-background text-foreground font-sans">
+      <Header />
+      <HeroSection />
+      <FeaturesSection />
+      <ChatDemoSection />
+      <PricingSection />
+      <ContactSection />
       <Footer />
     </main>
   );
