@@ -543,153 +543,131 @@ function ChatDemoSection() {
   );
 }
 
-// ─── PRICING SECTION ──────────────────────────────────────────────────────────
+// ─── PRODUCTOS SECTION ────────────────────────────────────────────────────────
 
-const PLANS = [
+const PRODUCTOS = [
   {
-    name: 'Growth',
-    description: 'Para agencias y profesionales que quieren delegar tareas repetitivas.',
-    monthlyPrice: 499,
-    annualPrice: 399,
-    features: [
-      'Hasta 2 agentes de IA activos',
-      'Integración con 3 herramientas (CRM, Email)',
-      'Soporte técnico por correo',
-      '5.000 interacciones/mes',
+    badge: "Solo automatización",
+    badgeCls: "bg-white/5 border-white/10 text-zinc-400",
+    name: "Fluxia Auto",
+    tagline: "Para negocios que ya tienen web o no la necesitan.",
+    feats: [
+      "Asistente WhatsApp con IA 24/7",
+      "Reservas y confirmaciones automáticas",
+      "Recordatorios y gestión de cancelaciones",
+      "Respuestas a preguntas frecuentes",
+      "Respuesta automática a reseñas de Google",
     ],
-    popular: false,
-    cta: 'Comenzar Ahora',
+    from: "Desde",
+    price: "€49",
+    period: "/mes",
+    featured: false,
+    cta: "Ver planes Auto",
   },
   {
-    name: 'Enterprise Scale',
-    description: 'Para empresas que buscan una infraestructura automatizada total.',
-    monthlyPrice: 999,
-    annualPrice: 799,
-    features: [
-      'Agentes de IA ilimitados',
-      'Flujos complejos multinodo y webhooks',
-      'Soporte prioritario 24/7 vía Slack',
-      'Mantenimiento y optimización mensual',
-      'Integración con cualquier herramienta',
-      'SLA garantizado 99.9%',
+    badge: "Pack completo",
+    badgeCls: "bg-emerald-950/40 border-emerald-500/25 text-emerald-400",
+    name: "Fluxia Pro",
+    tagline: "Web profesional + automatización + IA. Todo en uno.",
+    feats: [
+      "Todo lo de Fluxia Auto incluido",
+      "Web profesional diseñada para tu negocio",
+      "Dominio y hosting incluidos",
+      "SEO local optimizado",
+      "Integración web + WhatsApp unificada",
     ],
-    popular: true,
-    cta: 'Hablar con Experto',
+    from: "Setup desde",
+    price: "€799",
+    period: " + €49/mes",
+    featured: true,
+    cta: "Ver planes Pro",
   },
 ];
 
-function PricingSection() {
-  const [isAnnual, setIsAnnual] = useState(false);
-
+function ProductosSection() {
   return (
-    <section id="planes" className="relative py-32 px-6">
-      <div className="max-w-5xl mx-auto">
+    <section id="planes" className="relative py-24 px-6 lg:px-12 border-t border-white/5">
+      <div className="max-w-4xl mx-auto">
         {/* Section Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-16">
           <p className="text-xs font-medium tracking-[3px] uppercase text-emerald-400 mb-4">
-            Planes de Inversión
+            Productos
           </p>
-          <h2 className="text-4xl sm:text-5xl font-serif text-foreground mb-4">
-            Escoge el nivel de{' '}
-            <span className="gradient-text">automatización</span>
+          <h2 className="text-4xl sm:text-5xl font-serif text-foreground mb-3">
+            Elige el pack{' '}
+            <em className="italic text-emerald-400">que necesitas.</em>
           </h2>
-          <p className="text-muted-foreground max-w-lg mx-auto">
-            Transparente, sin letra pequeña. Cancela cuando quieras.
+          <p className="text-muted-foreground font-light">
+            Solo automatización, o el pack completo con web incluida.
           </p>
         </div>
 
-        {/* Toggle Switch */}
-        <div className="flex items-center justify-center gap-4 mb-12">
-          <span className={`text-sm transition-colors ${!isAnnual ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
-            Mensual
-          </span>
-          
-          <button
-            onClick={() => setIsAnnual(!isAnnual)}
-            className="relative w-14 h-7 rounded-full border border-border bg-card transition-all duration-300 hover:border-emerald-500/40"
-          >
-            <span
-              className={`absolute top-1 w-5 h-5 rounded-full transition-all duration-300 ${
-                isAnnual
-                  ? 'left-8 bg-gradient-to-r from-emerald-500 to-cyan-500'
-                  : 'left-1 bg-muted-foreground'
+        {/* Products Grid */}
+        <div className="grid md:grid-cols-2 gap-5">
+          {PRODUCTOS.map((p) => (
+            <div
+              key={p.name}
+              className={`rounded-2xl p-10 border flex flex-col gap-5 transition-all duration-300 hover:scale-[1.02] ${
+                p.featured
+                  ? "bg-emerald-950/10 border-emerald-500/20"
+                  : "bg-white/[0.02] border-white/10"
               }`}
-            />
-          </button>
+            >
+              {/* Badge */}
+              <span
+                className={`inline-block text-[11px] font-medium px-3 py-1 rounded-full border w-fit ${p.badgeCls}`}
+              >
+                {p.featured && <span className="mr-1">&#11088;</span>}
+                {p.badge}
+              </span>
 
-          <span className={`text-sm transition-colors ${isAnnual ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
-            Anual
-          </span>
-          
-          <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded-full border border-emerald-500/20 font-mono font-bold">
-            -20%
-          </span>
-        </div>
+              {/* Name & Tagline */}
+              <div>
+                <p className="text-2xl font-medium text-foreground">{p.name}</p>
+                <p className="text-sm text-muted-foreground mt-1 font-light">
+                  {p.tagline}
+                </p>
+              </div>
 
-        {/* Pricing Cards */}
-        <div className="grid md:grid-cols-2 gap-8">
-          {PLANS.map((plan) => {
-            const price = isAnnual ? plan.annualPrice : plan.monthlyPrice;
-            
-            return (
-              <div
-                key={plan.name}
-                className={`relative rounded-3xl p-8 flex flex-col transition-all duration-300 hover:scale-[1.02] ${
-                  plan.popular
-                    ? 'bg-gradient-to-b from-emerald-500/10 to-cyan-500/5 border-2 border-emerald-500/30 shadow-xl shadow-emerald-500/10'
-                    : 'bg-card border border-border hover:border-muted'
+              {/* Features */}
+              <ul className="flex flex-col gap-2.5">
+                {p.feats.map((f) => (
+                  <li
+                    key={f}
+                    className="flex items-start gap-2 text-[13.5px] text-muted-foreground"
+                  >
+                    <CheckIcon className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+
+              {/* Pricing */}
+              <div className="mt-auto pt-5 border-t border-white/10">
+                <p className="text-[11px] uppercase tracking-wider text-zinc-600">
+                  {p.from}
+                </p>
+                <p className="text-3xl font-medium text-foreground tracking-tight">
+                  {p.price}
+                  <span className="text-sm font-normal text-muted-foreground">
+                    {p.period}
+                  </span>
+                </p>
+              </div>
+
+              {/* CTA Button */}
+              <a
+                href="#contacto"
+                className={`w-full py-3 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-all duration-200 ${
+                  p.featured
+                    ? "bg-emerald-600 text-white hover:bg-emerald-700"
+                    : "border border-white/15 text-muted-foreground hover:border-white/25 hover:text-foreground bg-transparent"
                 }`}
               >
-                {/* Popular Badge */}
-                {plan.popular && (
-                  <span className="absolute top-0 right-8 -translate-y-1/2 bg-gradient-to-r from-emerald-500 to-cyan-500 text-background text-[11px] font-bold tracking-wider uppercase px-4 py-1.5 rounded-full">
-                    Más Recomendado
-                  </span>
-                )}
-
-                {/* Plan Info */}
-                <div className="mb-6">
-                  <h3 className="text-2xl font-bold text-foreground mb-2">{plan.name}</h3>
-                  <p className="text-muted-foreground text-sm">{plan.description}</p>
-                </div>
-
-                {/* Price */}
-                <div className="mb-8">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-5xl font-bold text-foreground">{price}€</span>
-                    <span className="text-muted-foreground text-sm">/ mes</span>
-                  </div>
-                  {isAnnual && (
-                    <p className="text-xs text-emerald-400 mt-1">
-                      Facturado anualmente ({price * 12}€/año)
-                    </p>
-                  )}
-                </div>
-
-                {/* Features */}
-                <ul className="space-y-4 mb-8 flex-grow">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-3 text-sm text-muted-foreground">
-                      <CheckIcon className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                {/* CTA Button */}
-                <a
-                  href="#contacto"
-                  className={`text-center font-semibold py-4 rounded-xl transition-all duration-200 hover:scale-105 ${
-                    plan.popular
-                      ? 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-background shadow-lg shadow-emerald-500/20'
-                      : 'bg-muted text-foreground hover:bg-muted/80'
-                  }`}
-                >
-                  {plan.cta}
-                </a>
-              </div>
-            );
-          })}
+                {p.cta} <ArrowRightIcon className="w-4 h-4" />
+              </a>
+            </div>
+          ))}
         </div>
       </div>
     </section>
@@ -862,7 +840,7 @@ export default function FluxiaPage() {
       <HeroSection />
       <FeaturesSection />
       <ChatDemoSection />
-      <PricingSection />
+      <ProductosSection />
       <ContactSection />
       <Footer />
     </main>
