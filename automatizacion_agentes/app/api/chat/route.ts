@@ -132,21 +132,22 @@ export async function POST(req: NextRequest) {
 
     // Petición HTTP nativa a la API de Google Gemini (1.5 Flash)
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          contents,
-          systemInstruction: {
-            parts: [{ text: SYSTEM_PROMPT }],
-          },
-          generationConfig: {
-            maxOutputTokens: 400,
-          },
-        }),
+          contents: [
+            // Aquí van tus mensajes del chat
+          ],
+          systemInstruction: { // <--- v1beta sí entiende este campo perfectamente
+            parts: [
+              { text: "Aquí va el prompt del sistema o rol del agente" }
+            ]
+          }
+        })
       }
     );
 
