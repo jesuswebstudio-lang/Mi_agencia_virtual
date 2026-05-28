@@ -1,76 +1,156 @@
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
+import { Resend } from "resend";
 
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-const SYSTEM_PROMPTS: Record<string, string> = {
-  restaurante: `Eres el asistente virtual de "Restaurante La Plaza", un restaurante mediterráneo en Madrid.
-Horario: Lunes a domingo, 13:00–16:00 y 20:00–23:30.
-Carta: Menú del día €14 (L–V). Especialidades: paella, pulpo a la gallega, chuletón.
-Alergias: Informas de ingredientes si te preguntan. Nunca das diagnósticos médicos.
-Reservas: Preguntas nombre, fecha, hora y número de comensales. Confirmas disponibilidad y dices que en menos de 1 minuto recibirán confirmación por WhatsApp.
-Capacidad: Máximo 8 personas por reserva estándar. Grupos más grandes requieren llamada.
-Responde siempre en español, de forma amable y concisa. Máximo 3 frases por respuesta.
-Si el cliente quiere cancelar, pides nombre y fecha de la reserva y confirmas la cancelación.
-No inventes información que no tienes. Si no sabes algo, di que lo consultas con el equipo.`,
+const SYSTEM_PROMPT = `Eres el asistente de ventas de Fluxia, una agencia de automatización con IA para negocios en España.
 
-  peluqueria: `Eres el asistente virtual de "Estudio Noa", una peluquería en Barcelona.
-Horario: Martes a sábado, 9:00–19:00. Lunes cerrado.
-Servicios y precios: Corte mujer €35, corte hombre €20, tinte completo desde €65, mechas desde €80, tratamiento keratina €90.
-Equipo: Noa (especialista en color), Carla (corte y peinado), Marc (barbería).
-Citas: Preguntas nombre, servicio deseado, empleada preferida (opcional) y día/hora. Confirmas y dices que recibirán recordatorio 24h antes.
-No-shows: Política de cancelación: avisar con 24h de antelación.
-Responde siempre en español, de forma amable y concisa. Máximo 3 frases por respuesta.
-Si no hay hueco, ofreces la siguiente disponibilidad o lista de espera.`,
+Tu objetivo es recopilar información del visitante para prepararle un presupuesto orientativo. Sigue este orden de preguntas de forma conversacional, una a una:
 
-  hookah: `Eres el asistente virtual de "Hookah Club Mist", una hookah lounge en Valencia.
-Horario: Jueves a domingo, 20:00–02:00. Entre semana cerrado.
-Reservas: Cabinas para 2–6 personas, zonas lounge para grupos de hasta 12.
-Precio entrada: €10 por persona, incluye primera shisha. Shisha adicional €15.
-Sabores disponibles: Menta, manzana, sandía, uva, melocotón, menta-limón, fresa.
-Normas: Mayores de 18 años. No se puede entrar con bebida externa.
-Citas: Preguntas nombre, número de personas, fecha y hora. Para grupos +8 pides señal de €20.
-Responde siempre en español, de forma amable y directa. Máximo 3 frases por respuesta.
-Promos: Jueves "noche de grupos", 20% descuento para grupos de 6 o más.`,
-};
+1. Nombre y nombre del negocio
+2. Sector (restaurante, peluquería, hookah, otro — si es otro, que especifique)
+3. Qué problema quiere resolver o qué quiere automatizar
+4. Cuántos mensajes/reservas/consultas recibe aproximadamente al día
+5. Si tiene web actualmente
+6. Email de contacto
+
+Una vez tengas todos los datos, genera un resumen así:
+---
+RESUMEN LISTO PARA ENVIAR:
+- Nombre: [nombre]
+- Negocio: [negocio]
+- Sector: [sector]
+- Necesidad: [qué quiere automatizar]
+- Volumen diario: [mensajes/reservas]
+- Tiene web: [sí/no]
+- Email: [email]
+
+PRESUPUESTO ORIENTATIVO:
+[Basándote en el sector y necesidad, indica qué plan de Fluxia le conviene (Auto Starter €49/mes, Auto Pro €89/mes, Auto Elite €149/mes, o Pro con web desde €799+€49/mes) y por qué en 2-3 frases.]
+---
+
+Cuando llegues a ese punto, añade exactamente esta frase al final: "ENVIAR_PRESUPUESTO"
+
+Reglas:
+- Sé amable, cercano y profesional
+- Máximo 2-3 frases por respuesta
+- No hagas más de una pregunta a la vez
+- No menciones precios hasta el resumen final
+- Si el visitante pregunta algo sobre Fluxia, responde brevemente y redirige a las preguntas`;
+
+function extractLeadData(conversation: string) {
+  const lines = conversation.split("\n");
+  const data: Record<string, string> = {};
+
+  for (const line of lines) {
+    if (line.includes("Nombre:")) data.nombre = line.split("Nombre:")[1]?.trim();
+    if (line.includes("Negocio:")) data.negocio = line.split("Negocio:")[1]?.trim();
+    if (line.includes("Sector:")) data.sector = line.split("Sector:")[1]?.trim();
+    if (line.includes("Necesidad:")) data.necesidad = line.split("Necesidad:")[1]?.trim();
+    if (line.includes("Volumen diario:")) data.volumen = line.split("Volumen diario:")[1]?.trim();
+    if (line.includes("Tiene web:")) data.web = line.split("Tiene web:")[1]?.trim();
+    if (line.includes("Email:")) data.email = line.split("Email:")[1]?.trim();
+  }
+
+  const presupuestoMatch = conversation.match(/PRESUPUESTO ORIENTATIVO:\n([\s\S]*?)(?:---|ENVIAR_PRESUPUESTO|$)/);
+  if (presupuestoMatch) data.presupuesto = presupuestoMatch[1].trim();
+
+  return data;
+}
+
+async function sendEmails(lead: Record<string, string>, fullSummary: string) {
+  await resend.emails.send({
+    from: "Fluxia Bot <onboarding@resend.dev>",
+    to: "jesus.webstudio@gmail.com",
+    subject: `🔥 Nuevo lead: ${lead.negocio || "Negocio nuevo"} — ${lead.sector || ""}`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background: #0a0a0a; color: #e5e5e5; border-radius: 12px;">
+        <h2 style="color: #34d399; margin-bottom: 24px;">Nuevo lead desde la web 🚀</h2>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr><td style="padding: 8px 0; color: #9ca3af; width: 140px;">Nombre</td><td style="padding: 8px 0; font-weight: 600;">${lead.nombre || "—"}</td></tr>
+          <tr><td style="padding: 8px 0; color: #9ca3af;">Negocio</td><td style="padding: 8px 0; font-weight: 600;">${lead.negocio || "—"}</td></tr>
+          <tr><td style="padding: 8px 0; color: #9ca3af;">Sector</td><td style="padding: 8px 0;">${lead.sector || "—"}</td></tr>
+          <tr><td style="padding: 8px 0; color: #9ca3af;">Necesidad</td><td style="padding: 8px 0;">${lead.necesidad || "—"}</td></tr>
+          <tr><td style="padding: 8px 0; color: #9ca3af;">Volumen/día</td><td style="padding: 8px 0;">${lead.volumen || "—"}</td></tr>
+          <tr><td style="padding: 8px 0; color: #9ca3af;">Tiene web</td><td style="padding: 8px 0;">${lead.web || "—"}</td></tr>
+          <tr><td style="padding: 8px 0; color: #9ca3af;">Email</td><td style="padding: 8px 0;"><a href="mailto:${lead.email}" style="color: #34d399;">${lead.email || "—"}</a></td></tr>
+        </table>
+        <div style="margin-top: 24px; padding: 16px; background: #111; border-left: 3px solid #34d399; border-radius: 4px;">
+          <p style="color: #34d399; font-weight: 600; margin: 0 0 8px;">Presupuesto orientativo</p>
+          <p style="margin: 0; line-height: 1.6;">${lead.presupuesto || "—"}</p>
+        </div>
+        <div style="margin-top: 24px; padding: 16px; background: #111; border-radius: 8px;">
+          <p style="color: #6b7280; font-size: 12px; margin: 0 0 8px;">Conversación completa</p>
+          <pre style="font-size: 12px; color: #9ca3af; white-space: pre-wrap; margin: 0;">${fullSummary}</pre>
+        </div>
+      </div>
+    `,
+  });
+
+  if (lead.email) {
+    await resend.emails.send({
+      from: "Fluxia <onboarding@resend.dev>",
+      to: lead.email,
+      subject: "Tu presupuesto orientativo de Fluxia ✅",
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background: #0a0a0a; color: #e5e5e5; border-radius: 12px;">
+          <h2 style="color: #34d399;">¡Hola, ${lead.nombre?.split(" ")[0] || ""}! 👋</h2>
+          <p style="color: #9ca3af; line-height: 1.6;">Hemos recibido tu solicitud de presupuesto para <strong style="color: #e5e5e5;">${lead.negocio || "tu negocio"}</strong>. Nuestro equipo lo revisará y te contactará en menos de 24 horas.</p>
+          <div style="margin: 24px 0; padding: 16px; background: #111; border-left: 3px solid #34d399; border-radius: 4px;">
+            <p style="color: #34d399; font-weight: 600; margin: 0 0 8px;">Presupuesto orientativo</p>
+            <p style="margin: 0; line-height: 1.6; color: #d1d5db;">${lead.presupuesto || "—"}</p>
+          </div>
+          <p style="color: #6b7280; font-size: 13px;">Si tienes cualquier duda, escríbenos a <a href="mailto:jesus.webstudio@gmail.com" style="color: #34d399;">jesus.webstudio@gmail.com</a></p>
+          <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #1f2937;">
+            <p style="margin: 0; font-size: 18px; font-weight: 600;">Flux<span style="color: #34d399;">ia</span></p>
+            <p style="margin: 4px 0 0; color: #6b7280; font-size: 12px;">El sistema que gestiona tu negocio mientras tú lo haces crecer.</p>
+          </div>
+        </div>
+      `,
+    });
+  }
+}
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages, sector = "restaurante" } = await req.json();
+    const { messages } = await req.json();
 
     if (!messages || !Array.isArray(messages)) {
-      return NextResponse.json(
-        { error: "messages array is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "messages array is required" }, { status: 400 });
     }
 
-    const systemPrompt =
-      SYSTEM_PROMPTS[sector] || SYSTEM_PROMPTS["restaurante"];
-
-    const response = await client.messages.create({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 300,
-      system: systemPrompt,
-      messages: messages.map(
-        (msg: { role: string; content: string }) => ({
-          role: msg.role as "user" | "assistant",
-          content: msg.content,
-        })
-      ),
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      max_tokens: 400,
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        ...messages.map((m: { role: string; content: string }) => ({
+          role: m.role as "user" | "assistant",
+          content: m.content,
+        })),
+      ],
     });
 
-    const text =
-      response.content[0].type === "text" ? response.content[0].text : "";
+    const reply = response.choices[0].message.content || "";
+    const shouldSend = reply.includes("ENVIAR_PRESUPUESTO");
+    const cleanReply = reply.replace("ENVIAR_PRESUPUESTO", "").trim();
 
-    return NextResponse.json({ message: text });
+    if (shouldSend) {
+      const fullConversation = messages
+        .map((m: { role: string; content: string }) =>
+          `${m.role === "user" ? "Visitante" : "Fluxia"}: ${m.content}`
+        )
+        .join("\n\n") + `\n\nFluxia: ${cleanReply}`;
+
+      const lead = extractLeadData(cleanReply);
+      await sendEmails(lead, fullConversation);
+    }
+
+    return NextResponse.json({ message: cleanReply, sent: shouldSend });
   } catch (error) {
-    console.error("Claude API error:", error);
-    return NextResponse.json(
-      { error: "Error al procesar el mensaje" },
-      { status: 500 }
-    );
+    console.error("API error:", error);
+    return NextResponse.json({ error: "Error al procesar el mensaje" }, { status: 500 });
   }
 }
