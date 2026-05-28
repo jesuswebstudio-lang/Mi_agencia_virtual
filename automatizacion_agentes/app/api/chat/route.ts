@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
 import { Resend } from "resend";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const SYSTEM_PROMPT = `Eres el asistente de ventas de Fluxia, una agencia de automatización con IA para negocios en España.
@@ -121,19 +119,46 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "messages array is required" }, { status: 400 });
     }
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      max_tokens: 400,
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        ...messages.map((m: { role: string; content: string }) => ({
-          role: m.role as "user" | "assistant",
-          content: m.content,
-        })),
-      ],
-    });
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json({ error: "GEMINI_API_KEY no está configurada" }, { status: 500 });
+    }
 
-    const reply = response.choices[0].message.content || "";
+    // Adaptar el historial al formato que exige Gemini (rol 'model' en lugar de 'assistant')
+    const contents = messages.map((m: { role: string; content: string }) => ({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{ text: m.content }],
+    }));
+
+    // Petición HTTP nativa a la API de Google Gemini (1.5 Flash)
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          contents,
+          systemInstruction: {
+            parts: [{ text: SYSTEM_PROMPT }],
+          },
+          generationConfig: {
+            maxOutputTokens: 400,
+          },
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorResponse = await response.json().catch(() => ({}));
+      console.error("Gemini API Error:", errorResponse);
+      return NextResponse.json({ error: "Error en la comunicación con Gemini" }, { status: response.status });
+    }
+
+    const data = await response.json();
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
     const shouldSend = reply.includes("ENVIAR_PRESUPUESTO");
     const cleanReply = reply.replace("ENVIAR_PRESUPUESTO", "").trim();
 
