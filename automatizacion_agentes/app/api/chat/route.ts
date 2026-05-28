@@ -95,7 +95,7 @@ async function sendEmails(lead: Record<string, string>, fullSummary: string) {
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background: #0a0a0a; color: #e5e5e5; border-radius: 12px;">
           <h2 style="color: #34d399;">¡Hola, ${lead.nombre?.split(" ")[0] || ""}! 👋</h2>
-          <p style="color: #9ca3af; line-height: 1.6;">Hemos recibido tu solicitud de presupuesto para <strong style="color: #e5e5e5;">${lead.negocio || "tu negocio"}</strong>. Nuestro equipo lo revisará y te contactará en menos de 24 horas.</p>
+          <p style="color: #9ca3af; line-height: 1.6;">Hemos recibido tu solicitud de presupuesto para <strong style="color: #e5e5e5;">${lead.negocio || "tu negocio"}</strong>. Nuestro equipo lo revisará y te contactará en menos de 24 hours.</p>
           <div style="margin: 24px 0; padding: 16px; background: #111; border-left: 3px solid #34d399; border-radius: 4px;">
             <p style="color: #34d399; font-weight: 600; margin: 0 0 8px;">Presupuesto orientativo</p>
             <p style="margin: 0; line-height: 1.6; color: #d1d5db;">${lead.presupuesto || "—"}</p>
@@ -139,12 +139,10 @@ export async function POST(req: NextRequest) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          contents: [
-            // Aquí van tus mensajes del chat
-          ],
-          systemInstruction: { // <--- v1beta sí entiende este campo perfectamente
+          contents: contents, // <-- CORREGIDO: Pasamos los mensajes formateados
+          systemInstruction: { 
             parts: [
-              { text: "Aquí va el prompt del sistema o rol del agente" }
+              { text: SYSTEM_PROMPT } // <-- CORREGIDO: Pasamos tu prompt de ventas real
             ]
           }
         })
