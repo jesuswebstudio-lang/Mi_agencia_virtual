@@ -570,126 +570,192 @@ function ChatDemoSection() {
 }
 // ─── PRODUCTOS SECTION ────────────────────────────────────────────────────────
 
-const PRODUCTOS = [
-  {
-    badge: "Solo automatización",
-    badgeCls: "bg-white/5 border-white/10 text-zinc-400",
-    name: "Fluxia Auto",
-    tagline: "Para negocios que ya tienen web o no la necesitan.",
-    feats: [
-      "Asistente WhatsApp con IA 24/7",
-      "Reservas y confirmaciones automáticas",
-      "Recordatorios y gestión de cancelaciones",
-      "Respuestas a preguntas frecuentes",
-      "Respuesta automática a reseñas de Google",
-    ],
-    from: "Desde",
-    price: "€49",
-    period: "/mes",
-    featured: false,
-    cta: "Ver planes Auto",
-  },
-  {
-    badge: "Pack completo",
-    badgeCls: "bg-emerald-950/40 border-emerald-500/25 text-emerald-400",
-    name: "Fluxia Pro",
-    tagline: "Web profesional + automatización + IA. Todo en uno.",
-    feats: [
-      "Todo lo de Fluxia Auto incluido",
-      "Web profesional diseñada para tu negocio",
-      "Dominio y hosting incluidos",
-      "SEO local optimizado",
-      "Integración web + WhatsApp unificada",
-    ],
-    from: "Setup desde",
-    price: "€799",
-    period: " + €49/mes",
-    featured: true,
-    cta: "Ver planes Pro",
-  },
-];
+// Reemplaza la función ProductosSection y el array PRODUCTOS en tu page.tsx por esto:
 
 function ProductosSection() {
+  const [activeTab, setActiveTab] = useState<"auto" | "pro">("auto");
+
+  const planes = {
+    auto: [
+      {
+        name: "Starter",
+        price: "€49",
+        period: "/mes",
+        description: "Para empezar a automatizar lo esencial.",
+        features: [
+          "Asistente WhatsApp con IA 24/7",
+          "Reservas y confirmaciones automáticas",
+          "Respuestas a preguntas frecuentes",
+        ],
+        featured: false,
+        cta: "Empezar",
+      },
+      {
+        name: "Pro",
+        price: "€89",
+        period: "/mes",
+        description: "El más completo para negocios en crecimiento.",
+        features: [
+          "Todo lo de Starter incluido",
+          "Recordatorios automáticos 24h antes",
+          "Gestión de cancelaciones",
+          "Respuesta automática a reseñas Google",
+        ],
+        featured: true,
+        cta: "Empezar",
+      },
+      {
+        name: "Elite",
+        price: "€149",
+        period: "/mes",
+        description: "Para negocios que quieren máximo rendimiento.",
+        features: [
+          "Todo lo de Pro incluido",
+          "Analytics y reportes mensuales",
+          "Soporte prioritario 24/7",
+          "Integraciones personalizadas",
+        ],
+        featured: false,
+        cta: "Empezar",
+      },
+    ],
+    pro: [
+      {
+        name: "Starter",
+        price: "€799",
+        period: " setup + €49/mes",
+        description: "Web profesional y automatización básica.",
+        features: [
+          "Web profesional diseñada para tu negocio",
+          "Dominio y hosting incluidos",
+          "Todo lo de Fluxia Auto Starter",
+        ],
+        featured: false,
+        cta: "Empezar",
+      },
+      {
+        name: "Pro",
+        price: "€1.199",
+        period: " setup + €89/mes",
+        description: "La opción más completa para destacar.",
+        features: [
+          "Web premium con diseño a medida",
+          "SEO local optimizado",
+          "Todo lo de Fluxia Auto Pro",
+          "Integración web + WhatsApp unificada",
+        ],
+        featured: true,
+        cta: "Empezar",
+      },
+      {
+        name: "Elite",
+        price: "€1.799",
+        period: " setup + €149/mes",
+        description: "Solución completa sin límites.",
+        features: [
+          "Web a medida con funcionalidades avanzadas",
+          "Todo lo de Fluxia Auto Elite",
+          "Soporte prioritario 24/7",
+          "Onboarding personalizado",
+        ],
+        featured: false,
+        cta: "Empezar",
+      },
+    ],
+  };
+
+  const current = planes[activeTab];
+
   return (
     <section id="planes" className="relative py-24 px-6 lg:px-12 border-t border-white/5">
-      <div className="max-w-4xl mx-auto">
-        {/* Section Header */}
-        <div className="text-center mb-16">
+      <div className="max-w-5xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-12">
           <p className="text-xs font-medium tracking-[3px] uppercase text-emerald-400 mb-4">
-            Productos
+            Planes
           </p>
           <h2 className="text-4xl sm:text-5xl font-serif text-foreground mb-3">
-            Elige el pack{' '}
+            Elige el plan{" "}
             <em className="italic text-emerald-400">que necesitas.</em>
           </h2>
-          <p className="text-muted-foreground font-light">
-            Solo automatización, o el pack completo con web incluida.
+          <p className="text-muted-foreground font-light mb-8">
+            14 días de prueba gratuita. Sin tarjeta de crédito.
           </p>
+
+          {/* Tab Toggle */}
+          <div className="inline-flex bg-card border border-border rounded-xl p-1 gap-1">
+            <button
+              onClick={() => setActiveTab("auto")}
+              className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                activeTab === "auto"
+                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Fluxia Auto
+            </button>
+            <button
+              onClick={() => setActiveTab("pro")}
+              className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                activeTab === "pro"
+                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Fluxia Pro
+            </button>
+          </div>
         </div>
 
-        {/* Products Grid */}
-        <div className="grid md:grid-cols-2 gap-5">
-          {PRODUCTOS.map((p) => (
+        {/* Cards */}
+        <div className="grid md:grid-cols-3 gap-4">
+          {current.map((plan) => (
             <div
-              key={p.name}
-              className={`rounded-2xl p-10 border flex flex-col gap-5 transition-all duration-300 hover:scale-[1.02] ${
-                p.featured
+              key={plan.name}
+              className={`relative rounded-2xl p-8 border flex flex-col gap-5 transition-all duration-300 hover:scale-[1.02] ${
+                plan.featured
                   ? "bg-emerald-950/10 border-emerald-500/20"
                   : "bg-white/[0.02] border-white/10"
               }`}
             >
-              {/* Badge */}
-              <span
-                className={`inline-block text-[11px] font-medium px-3 py-1 rounded-full border w-fit ${p.badgeCls}`}
-              >
-                {p.featured && <span className="mr-1">&#11088;</span>}
-                {p.badge}
-              </span>
+              {plan.featured && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                  <span className="bg-emerald-500 text-background text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                    Más popular
+                  </span>
+                </div>
+              )}
 
-              {/* Name & Tagline */}
               <div>
-                <p className="text-2xl font-medium text-foreground">{p.name}</p>
-                <p className="text-sm text-muted-foreground mt-1 font-light">
-                  {p.tagline}
-                </p>
+                <p className="text-sm font-medium text-foreground mb-1">{plan.name}</p>
+                <p className="text-xs text-muted-foreground font-light">{plan.description}</p>
               </div>
 
-              {/* Features */}
-              <ul className="flex flex-col gap-2.5">
-                {p.feats.map((f) => (
-                  <li
-                    key={f}
-                    className="flex items-start gap-2 text-[13.5px] text-muted-foreground"
-                  >
-                    <CheckIcon className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <span className="text-3xl font-medium text-foreground">{plan.price}</span>
+                <span className="text-sm text-muted-foreground">{plan.period}</span>
+              </div>
+
+              <ul className="flex flex-col gap-2.5 flex-1">
+                {plan.features.map((f) => (
+                  <li key={f} className="flex items-start gap-2 text-[13px] text-muted-foreground">
+                    <svg className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
                     {f}
                   </li>
                 ))}
               </ul>
 
-              {/* Pricing */}
-              <div className="mt-auto pt-5 border-t border-white/10">
-                <p className="text-[11px] uppercase tracking-wider text-zinc-600">
-                  {p.from}
-                </p>
-                <p className="text-3xl font-medium text-foreground tracking-tight">
-                  {p.price}
-                  <span className="text-sm font-normal text-muted-foreground">
-                    {p.period}
-                  </span>
-                </p>
-              </div>
-
-              {/* CTA Button */}
               <a
-                href="#contacto"
+                href="#demo-ia"
                 className={`w-full py-3 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-all duration-200 ${
-                  p.featured
+                  plan.featured
                     ? "bg-emerald-600 text-white hover:bg-emerald-700"
-                    : "border border-white/15 text-muted-foreground hover:border-white/25 hover:text-foreground bg-transparent"
+                    : "border border-white/15 text-muted-foreground hover:border-white/25 hover:text-foreground"
                 }`}
               >
-                {p.cta} <ArrowRightIcon className="w-4 h-4" />
+                {plan.cta}
               </a>
             </div>
           ))}
