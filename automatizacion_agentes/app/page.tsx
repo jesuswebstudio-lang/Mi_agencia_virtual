@@ -435,12 +435,17 @@ function ChatDemoSection() {
         body: JSON.stringify({ messages: newMessages }),
       });
 
+    
       const data = await res.json();
 
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: data.message },
-      ]);
+if (!res.ok || !data.message) {
+  throw new Error(data.error || "Sin respuesta");
+}
+
+setMessages((prev) => [
+  ...prev,
+  { role: "assistant", content: data.message },
+]);
 
       if (data.sent) setSent(true);
     } catch {
