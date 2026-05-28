@@ -388,81 +388,95 @@ function FeaturesSection() {
 
 // ─── INTERACTIVE CHAT DEMO ────────────────────────────────────────────────────
 
-interface ChatMessage {
-  role: 'user' | 'assistant';
-  text: string;
-}
+// Reemplaza la función ChatDemoSection en tu page.tsx por esta:
 
-const SAMPLE_QUESTIONS = [
-  {
-    question: '¿Cómo automatizo la entrada de leads?',
-    answer: 'Conectamos un webhook a tus canales de entrada (Meta Ads, Web). La IA lee cada solicitud, califica el lead según tus criterios en menos de 5 segundos, lo introduce filtrado en tu CRM y envía un aviso inmediato por Slack o email a tu equipo.',
-  },
-  {
-    question: '¿Se puede conectar con mi calendario?',
-    answer: 'Por supuesto. El agente analiza la disponibilidad real de tu equipo mediante integraciones con Google Calendar o Calendly, y gestiona de forma autónoma la conversación con el cliente para cerrar el día y hora que mejor convenga a ambas partes.',
-  },
-  {
-    question: '¿Qué pasa si el agente no sabe responder?',
-    answer: 'El sistema detecta automáticamente consultas fuera de su dominio de conocimiento. En estos casos, escala la conversación a un agente humano de tu equipo via Slack, WhatsApp o email, adjuntando todo el contexto de la conversación.',
-  },
-];
+interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
 
 function ChatDemoSection() {
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: 'assistant', text: '¡Hola! Soy el agente inteligente de Fluxia. ¿Qué proceso de tu negocio te gustaría automatizar hoy?' },
+    {
+      role: "assistant",
+      content: "¡Hola! Soy el asistente de Fluxia. Voy a prepararte un presupuesto personalizado en menos de 2 minutos. ¿Cómo te llamas y cuál es el nombre de tu negocio?",
+    },
   ]);
+  const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [sent, setSent] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  const handleQuestionClick = (question: string, answer: string) => {
-    if (isTyping) return;
-
-    // Add user message
-    setMessages((prev) => [...prev, { role: 'user', text: question }]);
-    setIsTyping(true);
-
-    // Scroll to bottom
+  const scrollToBottom = () => {
     setTimeout(() => {
       chatContainerRef.current?.scrollTo({
         top: chatContainerRef.current.scrollHeight,
-        behavior: 'smooth',
+        behavior: "smooth",
       });
     }, 100);
+  };
 
-    // Simulate AI response after delay
-    setTimeout(() => {
-      setMessages((prev) => [...prev, { role: 'assistant', text: answer }]);
+  const sendMessage = async (text: string) => {
+    if (!text.trim() || isTyping || sent) return;
+
+    const newMessages: ChatMessage[] = [
+      ...messages,
+      { role: "user", content: text },
+    ];
+    setMessages(newMessages);
+    setInput("");
+    setIsTyping(true);
+    scrollToBottom();
+
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: newMessages }),
+      });
+
+      const data = await res.json();
+
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: data.message },
+      ]);
+
+      if (data.sent) setSent(true);
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "Ha ocurrido un error. Por favor, inténtalo de nuevo.",
+        },
+      ]);
+    } finally {
       setIsTyping(false);
+      scrollToBottom();
+    }
+  };
 
-      // Scroll to bottom again
-      setTimeout(() => {
-        chatContainerRef.current?.scrollTo({
-          top: chatContainerRef.current.scrollHeight,
-          behavior: 'smooth',
-        });
-      }, 100);
-    }, 1500);
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") sendMessage(input);
   };
 
   return (
     <section id="demo-ia" className="relative py-32 px-6 bg-card/50">
       <div className="max-w-4xl mx-auto">
-        {/* Section Header */}
         <div className="text-center mb-12">
           <p className="text-xs font-medium tracking-[3px] uppercase text-cyan-400 mb-4">
             Demo Interactiva
           </p>
           <h2 className="text-4xl sm:text-5xl font-serif text-foreground mb-4">
-            Interactúa con{' '}
-            <span className="gradient-text">Nuestro Agente</span>
+            Recibe tu{" "}
+            <span className="gradient-text">presupuesto gratis</span>
           </h2>
           <p className="text-muted-foreground">
-            Haz clic en una pregunta para ver cómo razona e interactúa la IA en tiempo real.
+            Responde unas preguntas rápidas y te enviamos un presupuesto personalizado al instante.
           </p>
         </div>
 
-        {/* Chat Window */}
         <div className="bg-background border border-border rounded-2xl overflow-hidden shadow-2xl shadow-black/20">
           {/* Terminal Header */}
           <div className="bg-card border-b border-border px-4 py-3 flex items-center gap-3">
@@ -472,7 +486,7 @@ function ChatDemoSection() {
               <div className="w-3 h-3 rounded-full bg-green-500/60" />
             </div>
             <span className="text-xs text-muted-foreground font-mono ml-4">
-              fluxia-agent-terminal v2.0.0
+              fluxia-sales-agent v1.0
             </span>
             <div className="ml-auto flex items-center gap-2">
               <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
@@ -480,7 +494,7 @@ function ChatDemoSection() {
             </div>
           </div>
 
-          {/* Chat Messages */}
+          {/* Messages */}
           <div
             ref={chatContainerRef}
             className="p-6 min-h-[350px] max-h-[400px] overflow-y-auto space-y-4"
@@ -488,61 +502,72 @@ function ChatDemoSection() {
             {messages.map((msg, idx) => (
               <div
                 key={idx}
-                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-300`}
+                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[80%] rounded-2xl px-5 py-3 text-sm leading-relaxed ${
-                    msg.role === 'user'
-                      ? 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-background font-medium rounded-br-sm'
-                      : 'bg-card border border-border text-foreground rounded-bl-sm'
+                  className={`max-w-[80%] rounded-2xl px-5 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
+                    msg.role === "user"
+                      ? "bg-gradient-to-r from-emerald-500 to-cyan-500 text-background font-medium rounded-br-sm"
+                      : "bg-card border border-border text-foreground rounded-bl-sm"
                   }`}
                 >
-                  {msg.text}
+                  {msg.content}
                 </div>
               </div>
             ))}
+
             {isTyping && (
               <div className="flex justify-start">
-                <div className="bg-card border border-border text-muted-foreground max-w-[80%] rounded-2xl rounded-bl-sm px-5 py-3 text-sm flex items-center gap-2">
+                <div className="bg-card border border-border max-w-[80%] rounded-2xl rounded-bl-sm px-5 py-3 flex items-center gap-2">
                   <span className="flex gap-1">
-                    <span className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    {[0, 150, 300].map((delay) => (
+                      <span
+                        key={delay}
+                        className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce"
+                        style={{ animationDelay: `${delay}ms` }}
+                      />
+                    ))}
                   </span>
-                  <span className="ml-2">Fluxia está pensando...</span>
+                  <span className="text-sm text-muted-foreground ml-2">
+                    Fluxia está escribiendo...
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {sent && (
+              <div className="flex justify-center">
+                <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm px-6 py-3 rounded-full">
+                  ✅ Presupuesto enviado a tu email
                 </div>
               </div>
             )}
           </div>
 
-          {/* Sample Questions */}
-          <div className="p-4 bg-card/80 border-t border-border">
-            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-3">
-              Preguntas frecuentes:
-            </p>
-            <div className="flex flex-col sm:flex-row gap-2">
-              {SAMPLE_QUESTIONS.map((q, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => handleQuestionClick(q.question, q.answer)}
-                  disabled={isTyping}
-                  className={`flex-1 text-left text-xs bg-background border border-border text-muted-foreground p-3 rounded-lg transition-all duration-200 ${
-                    isTyping
-                      ? 'opacity-50 cursor-not-allowed'
-                      : 'hover:border-emerald-500/40 hover:text-foreground hover:bg-emerald-500/5'
-                  }`}
-                >
-                  <span className="text-emerald-400 mr-1">→</span> {q.question}
-                </button>
-              ))}
-            </div>
+          {/* Input */}
+          <div className="p-4 bg-card/80 border-t border-border flex gap-3">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              disabled={isTyping || sent}
+              placeholder={sent ? "Presupuesto enviado ✅" : "Escribe tu respuesta..."}
+              className="flex-1 bg-background border border-border rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-emerald-500/50 transition-colors disabled:opacity-50"
+            />
+            <button
+              onClick={() => sendMessage(input)}
+              disabled={isTyping || sent || !input.trim()}
+              className="bg-gradient-to-r from-emerald-500 to-cyan-500 text-background font-semibold text-sm px-5 py-3 rounded-xl disabled:opacity-40 hover:opacity-90 transition-all"
+            >
+              Enviar
+            </button>
           </div>
         </div>
       </div>
     </section>
   );
 }
-
 // ─── PRODUCTOS SECTION ────────────────────────────────────────────────────────
 
 const PRODUCTOS = [
