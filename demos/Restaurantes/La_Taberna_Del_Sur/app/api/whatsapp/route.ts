@@ -90,11 +90,16 @@ async function askGemini(
 }
 
 async function getHistory(phone: string) {
-  const res = await fetch(REDIS_URL + "/get/" + phone, {
-    headers: { Authorization: "Bearer " + REDIS_TOKEN },
-  });
-  const data = await res.json();
-  return data.result ? JSON.parse(data.result) : [];
+  try {
+    const res = await fetch(REDIS_URL + "/get/" + phone, {
+      headers: { Authorization: "Bearer " + REDIS_TOKEN },
+    });
+    const data = await res.json();
+    const parsed = data.result ? JSON.parse(data.result) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
 }
 
 async function saveHistory(phone: string, history: unknown[]) {
