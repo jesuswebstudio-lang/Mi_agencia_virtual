@@ -34,6 +34,9 @@ const SYSTEM_PROMPT = [
   "- Nunca inventes informacion que no este en este prompt",
 ].join("\n");
 
+const REDIS_URL = process.env.UPSTASH_REDIS_REST_URL;
+const REDIS_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
+
 async function askGemini(
   userMessage: string,
   userName: string,
