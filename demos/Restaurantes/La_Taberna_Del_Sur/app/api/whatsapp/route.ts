@@ -89,6 +89,22 @@ async function askGemini(
   return text.trim();
 }
 
+async function getHistory(phone: string) {
+  const res = await fetch(REDIS_URL + "/get/" + phone, {
+    headers: { Authorization: "Bearer " + REDIS_TOKEN },
+  });
+  const data = await res.json();
+  return data.result ? JSON.parse(data.result) : [];
+}
+
+async function saveHistory(phone: string, history: unknown[]) {
+  await fetch(REDIS_URL + "/set/" + phone, {
+    method: "POST",
+    headers: { Authorization: "Bearer " + REDIS_TOKEN, "Content-Type": "application/json" },
+    body: JSON.stringify({ value: JSON.stringify(history), ex: 86400 }),
+  });
+}
+
 function twimlResponse(message: string): NextResponse {
   const safe = message
     .replace(/&/g, "&amp;")
