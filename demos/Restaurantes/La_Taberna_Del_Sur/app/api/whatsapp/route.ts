@@ -139,7 +139,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const aiReply = await askGemini(body, profileName, []);
+    const history = await getHistory(from);
+    const aiReply = await askGemini(body, "", history);
+    history.push({ role: "user", parts: [{ text: body }] });
+    history.push({ role: "model", parts: [{ text: aiReply }] });
+    await saveHistory(from, history);
 
     console.log("[WhatsApp Reservas] Respuesta -> " + aiReply.slice(0, 80));
 
