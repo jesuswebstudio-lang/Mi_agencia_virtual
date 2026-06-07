@@ -1,5 +1,42 @@
 import { NextRequest, NextResponse } from "next/server";
 
+// Historial de conversaciones por número de teléfono
+const conversaciones = new Map<
+  string,
+  {
+    mensajes: Array<{ role: string; parts: Array<{ text: string }> }>;
+    ultimaActividad: number;
+  }
+>();
+
+const EXPIRACION_MS = 2 * 60 * 60 * 1000; // 2 horas
+
+function obtenerHistorial(telefono: string) {
+  const conv = conversaciones.get(telefono);
+  if (!conv) return [];
+  if (Date.now() - conv.ultimaActividad > EXPIRACION_MS) {
+    conversaciones.delete(telefono);
+    return [];
+  }
+  return conv.mensajes;
+}
+
+function guardarMensajes(
+  telefono: string,
+  userText: string,
+  assistantText: string
+) {
+  if (!conversaciones.has(telefono)) {
+    conversaciones.set(telefono, { mensajes: [], ultimaActividad: Date.now() });
+  }
+  const conv = conversaciones.get(telefono)!;
+  conv.mensajes.push(
+    { role: "user", parts: [{ text: userText }] },
+    { role: "model", parts: [{ text: assistantText }] }
+  );
+  conv.ultimaActividad = Date.now();
+}
+
 const SYSTEM_PROMPT = [
   "Eres el asistente virtual de 'La Taberna del Sur', un restaurante de cocina andaluza en Madrid.",
   "",
@@ -33,9 +70,6 @@ const SYSTEM_PROMPT = [
   "- Responde siempre en el idioma en que te escriban (espanol o ingles)",
   "- Nunca inventes informacion que no este en este prompt",
 ].join("\n");
-
-const REDIS_URL = process.env.UPSTASH_REDIS_REST_URL;
-const REDIS_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
 async function askGemini(
   userMessage: string,
@@ -89,27 +123,6 @@ async function askGemini(
   return text.trim();
 }
 
-async function getHistory(phone: string) {
-  try {
-    const res = await fetch(REDIS_URL + "/get/" + phone, {
-      headers: { Authorization: "Bearer " + REDIS_TOKEN },
-    });
-    const data = await res.json();
-    const parsed = data.result ? JSON.parse(data.result) : [];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
-async function saveHistory(phone: string, history: unknown[]) {
-  await fetch(REDIS_URL + "/set/" + phone, {
-    method: "POST",
-    headers: { Authorization: "Bearer " + REDIS_TOKEN, "Content-Type": "application/json" },
-    body: JSON.stringify({ value: JSON.stringify(history), ex: 86400 }),
-  });
-}
-
 function twimlResponse(message: string): NextResponse {
   const safe = message
     .replace(/&/g, "&amp;")
@@ -144,11 +157,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const history = await getHistory(from);
-    const aiReply = await askGemini(body, "", history);
-    history.push({ role: "user", parts: [{ text: body }] });
-    history.push({ role: "model", parts: [{ text: aiReply }] });
-    await saveHistory(from, history);
+    const historial = obtenerHistorial(from);
+    const aiReply = await askGemini(body, profileName, historial);
+
+    // Guardar turno completo en el historial
+    guardarMensajes(from, profileName ? `[Cliente: ${profileName}]\n${body}` : body, aiReply);
 
     console.log("[WhatsApp Reservas] Respuesta -> " + aiReply.slice(0, 80));
 
