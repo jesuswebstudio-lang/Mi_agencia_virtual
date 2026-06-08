@@ -113,4 +113,3 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ ok: false, error: String(err) }, { status: 500 })
   }
 }
-
