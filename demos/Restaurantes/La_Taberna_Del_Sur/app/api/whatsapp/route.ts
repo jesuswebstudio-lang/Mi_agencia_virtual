@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+// ─── Historial por número ────────────────────────────────────────────────────
 const conversaciones = new Map<
   string,
   {
@@ -9,7 +10,7 @@ const conversaciones = new Map<
 >();
 
 const EXPIRACION_MS = 2 * 60 * 60 * 1000;
-const MAX_TURNOS = 6; // Solo últimos 6 mensajes (3 turnos)
+const MAX_TURNOS = 6;
 
 function obtenerHistorial(telefono: string) {
   const conv = conversaciones.get(telefono);
@@ -33,8 +34,8 @@ function guardarMensajes(telefono: string, userText: string, assistantText: stri
   conv.ultimaActividad = Date.now();
 }
 
+// ─── System prompt ───────────────────────────────────────────────────────────
 function getSystemPrompt(): string {
-  // Fecha compacta: "lun 9 jun 2025"
   const ahora = new Date().toLocaleDateString("es-ES", {
     timeZone: "Europe/Madrid",
     weekday: "short",
@@ -43,7 +44,6 @@ function getSystemPrompt(): string {
     year: "numeric",
   });
 
-  // Prompt ultra compacto — mismo comportamiento, ~60% menos tokens
   return `Eres asistente de reservas de La Taberna del Sur (Madrid). Hoy: ${ahora}.
 RESTAURANTE: C/Gran Via 42 | Tel: 910123456 | L-D 13-16h y 20-23:30h | Precio: 25-35€/pp | Máx 40 personas.
 Especialidades: jamón ibérico, gazpacho, carrillada, tortilla, croquetas.
@@ -52,6 +52,7 @@ FLUJO (una pregunta a la vez):
 REGLAS: Respuestas cortas (máx 3 líneas). Tuteo. Hora fuera de rango→ofrece la más cercana. +15 personas→llamen al tel. Alergias→el equipo lo tendrá en cuenta. Cancelar/modificar→pide nombre+tel. Responde en el idioma del cliente.`;
 }
 
+// ─── Gemini ──────────────────────────────────────────────────────────────────
 async function askGemini(
   userMessage: string,
   conversationHistory: Array<{ role: string; parts: Array<{ text: string }> }>
@@ -70,7 +71,7 @@ async function askGemini(
           { role: "user", parts: [{ text: userMessage }] },
         ],
         generationConfig: {
-          maxOutputTokens: 150, // Suficiente para WhatsApp
+          maxOutputTokens: 150,
           temperature: 0.5,
         },
       }),
@@ -89,6 +90,89 @@ async function askGemini(
   return text.trim();
 }
 
+// ─── Detectar reserva confirmada ─────────────────────────────────────────────
+function reservaConfirmada(respuesta: string): boolean {
+  const keywords = [
+    "confirmada", "confirmado", "anotada", "anotado",
+    "reserva hecha", "queda registrada", "todo listo",
+    "te esperamos", "nos vemos"
+  ];
+  const lower = respuesta.toLowerCase();
+  return keywords.some((kw) => lower.includes(kw));
+}
+
+// ─── Extraer resumen con Gemini ───────────────────────────────────────────────
+async function extraerResumen(
+  historial: Array<{ role: string; parts: Array<{ text: string }> }>,
+  confirmacion: string
+): Promise<string> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  const conversacionTexto = historial
+    .map((m) => `${m.role === "user" ? "Cliente" : "Bot"}: ${m.parts[0].text}`)
+    .join("\n");
+
+  const prompt = `Dada esta conversación de reserva:
+${conversacionTexto}
+Bot: ${confirmacion}
+
+Extrae los datos y devuelve SOLO este bloque (sin texto extra):
+🍽️ Nueva reserva — La Taberna del Sur
+👤 Nombre: [nombre y apellido]
+👥 Personas: [número]
+📅 Fecha: [fecha completa]
+🕐 Hora: [hora]
+📞 Contacto: [teléfono]`;
+
+  const response = await fetch(
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: { maxOutputTokens: 100, temperature: 0 },
+      }),
+    }
+  );
+
+  const data = await response.json();
+  return data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? "Nueva reserva confirmada (sin detalles)";
+}
+
+// ─── Notificación WhatsApp al dueño ──────────────────────────────────────────
+async function notificarDueno(resumen: string): Promise<void> {
+  const accountSid = process.env.TWILIO_ACCOUNT_SID;
+  const authToken  = process.env.TWILIO_AUTH_TOKEN;
+  const fromNumber = process.env.TWILIO_WHATSAPP_NUMBER; // whatsapp:+14155238886
+  const ownerNumber = "whatsapp:+34608892038";
+
+  const body = new URLSearchParams({
+    From: `whatsapp:${fromNumber}`,
+    To:   ownerNumber,
+    Body: resumen,
+  });
+
+  const resp = await fetch(
+    `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: "Basic " + Buffer.from(`${accountSid}:${authToken}`).toString("base64"),
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: body.toString(),
+    }
+  );
+
+  if (!resp.ok) {
+    const err = await resp.json();
+    console.error("[Notificación dueño] Error Twilio:", err);
+  } else {
+    console.log("[Notificación dueño] Enviada correctamente a +34608892038");
+  }
+}
+
+// ─── TwiML helper ────────────────────────────────────────────────────────────
 function twimlResponse(message: string): NextResponse {
   const safe = message
     .replace(/&/g, "&amp;")
@@ -102,6 +186,7 @@ function twimlResponse(message: string): NextResponse {
   );
 }
 
+// ─── Handler principal ───────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
@@ -113,8 +198,16 @@ export async function POST(req: NextRequest) {
     }
 
     const historial = obtenerHistorial(from);
-    const aiReply = await askGemini(body, historial);
+    const aiReply   = await askGemini(body, historial);
     guardarMensajes(from, body, aiReply);
+
+    // Si la reserva acaba de confirmarse → notificar al dueño
+    if (reservaConfirmada(aiReply)) {
+      const resumen = await extraerResumen(obtenerHistorial(from), aiReply);
+      notificarDueno(resumen).catch((e) =>
+        console.error("[Notificación dueño] Fallo silencioso:", e)
+      );
+    }
 
     return twimlResponse(aiReply);
   } catch (error) {
