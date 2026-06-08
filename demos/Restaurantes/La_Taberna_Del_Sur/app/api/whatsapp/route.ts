@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { supabase } from "@/lib/supabase";
 
 // ─── Historial por número ────────────────────────────────────────────────────
 const conversaciones = new Map<
@@ -22,7 +23,11 @@ function obtenerHistorial(telefono: string) {
   return conv.mensajes.slice(-MAX_TURNOS);
 }
 
-function guardarMensajes(telefono: string, userText: string, assistantText: string) {
+function guardarMensajes(
+  telefono: string,
+  userText: string,
+  assistantText: string
+) {
   if (!conversaciones.has(telefono)) {
     conversaciones.set(telefono, { mensajes: [], ultimaActividad: Date.now() });
   }
@@ -60,7 +65,8 @@ async function askGemini(
   const apiKey = process.env.GEMINI_API_KEY;
 
   const response = await fetch(
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey,
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" +
+      apiKey,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -93,12 +99,33 @@ async function askGemini(
 // ─── Detectar reserva confirmada ─────────────────────────────────────────────
 function reservaConfirmada(respuesta: string): boolean {
   const keywords = [
-    "confirmada", "confirmado", "anotada", "anotado",
-    "reserva hecha", "queda registrada", "todo listo",
-    "te esperamos", "nos vemos"
+    "confirmada",
+    "confirmado",
+    "anotada",
+    "anotado",
+    "reserva hecha",
+    "queda registrada",
+    "todo listo",
+    "te esperamos",
+    "nos vemos",
   ];
   const lower = respuesta.toLowerCase();
   return keywords.some((kw) => lower.includes(kw));
+}
+
+// ─── Detectar respuesta a recordatorio ───────────────────────────────────────
+function esConfirmacionPositiva(mensaje: string): boolean {
+  const positivos = ["sí", "si", "yes", "claro", "confirmo", "allí estaré",
+    "alli estare", "por supuesto", "ahí estaré", "ahi estare", "vamos", "ok", "vale"];
+  const lower = mensaje.toLowerCase();
+  return positivos.some((p) => lower.includes(p));
+}
+
+function esCancelacion(mensaje: string): boolean {
+  const negativos = ["no", "cancelar", "cancelad", "no puedo", "no voy",
+    "no iremos", "imposible", "cancel"];
+  const lower = mensaje.toLowerCase();
+  return negativos.some((n) => lower.includes(n));
 }
 
 // ─── Extraer resumen con Gemini ───────────────────────────────────────────────
@@ -108,7 +135,10 @@ async function extraerResumen(
 ): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY;
   const conversacionTexto = historial
-    .map((m) => `${m.role === "user" ? "Cliente" : "Bot"}: ${m.parts[0].text}`)
+    .map(
+      (m) =>
+        `${m.role === "user" ? "Cliente" : "Bot"}: ${m.parts[0].text}`
+    )
     .join("\n");
 
   const prompt = `Dada esta conversación de reserva:
@@ -124,7 +154,8 @@ Extrae los datos y devuelve SOLO este bloque (sin texto extra):
 📞 Contacto: [teléfono]`;
 
   const response = await fetch(
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey,
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" +
+      apiKey,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -136,19 +167,104 @@ Extrae los datos y devuelve SOLO este bloque (sin texto extra):
   );
 
   const data = await response.json();
-  return data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? "Nueva reserva confirmada (sin detalles)";
+  return (
+    data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ??
+    "Nueva reserva confirmada (sin detalles)"
+  );
+}
+
+// ─── Extraer datos estructurados para Supabase ────────────────────────────────
+async function extraerDatosReserva(
+  historial: Array<{ role: string; parts: Array<{ text: string }> }>,
+  confirmacion: string
+): Promise<{
+  nombre: string;
+  personas: number;
+  fecha: string; // YYYY-MM-DD
+  hora: string;  // HH:MM
+  telefono: string;
+} | null> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  const conversacionTexto = historial
+    .map((m) => `${m.role === "user" ? "Cliente" : "Bot"}: ${m.parts[0].text}`)
+    .join("\n");
+
+  const hoy = new Date().toISOString().split("T")[0]; // para que resuelva fechas relativas
+
+  const prompt = `Dada esta conversación de reserva (fecha actual: ${hoy}):
+${conversacionTexto}
+Bot: ${confirmacion}
+
+Devuelve SOLO un JSON válido con esta estructura exacta (sin markdown, sin texto extra):
+{"nombre":"Nombre Apellido","personas":4,"fecha":"YYYY-MM-DD","hora":"HH:MM","telefono":"+34XXXXXXXXX"}
+
+Si algún dato no está disponible usa null. La fecha debe estar en formato YYYY-MM-DD y la hora en HH:MM (24h).`;
+
+  const response = await fetch(
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" +
+      apiKey,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: { maxOutputTokens: 80, temperature: 0 },
+      }),
+    }
+  );
+
+  const data = await response.json();
+  const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? "";
+  try {
+    const clean = raw.replace(/```json|```/g, "").trim();
+    return JSON.parse(clean);
+  } catch {
+    console.error("[extraerDatosReserva] JSON inválido:", raw);
+    return null;
+  }
+}
+
+// ─── Guardar reserva en Supabase ──────────────────────────────────────────────
+async function guardarReservaEnSupabase(datos: {
+  nombre: string;
+  personas: number;
+  fecha: string;
+  hora: string;
+  telefono: string;
+}): Promise<string | null> {
+  const { data, error } = await supabase
+    .from("reservas")
+    .insert({
+      restaurante: "La Taberna del Sur",
+      nombre: datos.nombre,
+      telefono: datos.telefono,
+      personas: datos.personas,
+      fecha: datos.fecha,
+      hora: datos.hora,
+      estado: "nueva",
+      recordatorio_enviado: false,
+    })
+    .select("id")
+    .single();
+
+  if (error) {
+    console.error("[Supabase] Error guardando reserva:", error);
+    return null;
+  }
+  console.log("[Supabase] Reserva guardada con ID:", data.id);
+  return data.id;
 }
 
 // ─── Notificación WhatsApp al dueño ──────────────────────────────────────────
 async function notificarDueno(resumen: string): Promise<void> {
   const accountSid = process.env.TWILIO_ACCOUNT_SID;
-  const authToken  = process.env.TWILIO_AUTH_TOKEN;
-  const fromNumber = process.env.TWILIO_WHATSAPP_NUMBER; // whatsapp:+14155238886
+  const authToken = process.env.TWILIO_AUTH_TOKEN;
+  const fromNumber = process.env.TWILIO_WHATSAPP_NUMBER;
   const ownerNumber = "whatsapp:+34608892038";
 
   const body = new URLSearchParams({
     From: `whatsapp:${fromNumber}`,
-    To:   ownerNumber,
+    To: ownerNumber,
     Body: resumen,
   });
 
@@ -157,7 +273,9 @@ async function notificarDueno(resumen: string): Promise<void> {
     {
       method: "POST",
       headers: {
-        Authorization: "Basic " + Buffer.from(`${accountSid}:${authToken}`).toString("base64"),
+        Authorization:
+          "Basic " +
+          Buffer.from(`${accountSid}:${authToken}`).toString("base64"),
         "Content-Type": "application/x-www-form-urlencoded",
       },
       body: body.toString(),
@@ -191,19 +309,62 @@ export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
     const body = (formData.get("Body") as string)?.trim();
-    const from = formData.get("From") as string;
+    const from = formData.get("From") as string; // "whatsapp:+34XXXXXXXXX"
 
     if (!body) {
-      return twimlResponse("Hola! Soy el asistente de La Taberna del Sur. ¿En qué puedo ayudarte?");
+      return twimlResponse(
+        "Hola! Soy el asistente de La Taberna del Sur. ¿En qué puedo ayudarte?"
+      );
     }
 
+    const telefonoCliente = from.replace("whatsapp:", "");
+
+    // ── ¿Está respondiendo a un recordatorio de confirmación? ────────────────
+    const reservaPendiente = await buscarReservaPendiente(telefonoCliente);
+    if (reservaPendiente) {
+      if (esConfirmacionPositiva(body)) {
+        await supabase
+          .from("reservas")
+          .update({ estado: "confirmada" })
+          .eq("id", reservaPendiente.id);
+        return twimlResponse(
+          `¡Perfecto! Tu reserva del ${reservaPendiente.fecha} a las ${reservaPendiente.hora} queda confirmada. ¡Te esperamos! 🍷`
+        );
+      }
+
+      if (esCancelacion(body)) {
+        await supabase
+          .from("reservas")
+          .update({ estado: "cancelada" })
+          .eq("id", reservaPendiente.id);
+        return twimlResponse(
+          "Entendido, hemos cancelado tu reserva. Si cambias de idea escríbenos y te buscamos hueco. ¡Hasta pronto!"
+        );
+      }
+
+      // Respuesta ambigua → dejar que Gemini conteste normalmente
+    }
+
+    // ── Flujo normal de reserva ──────────────────────────────────────────────
     const historial = obtenerHistorial(from);
-    const aiReply   = await askGemini(body, historial);
+    const aiReply = await askGemini(body, historial);
     guardarMensajes(from, body, aiReply);
 
-    // Si la reserva acaba de confirmarse → notificar al dueño
+    // ── Si la reserva acaba de confirmarse ───────────────────────────────────
     if (reservaConfirmada(aiReply)) {
-      const resumen = await extraerResumen(obtenerHistorial(from), aiReply);
+      const historialActualizado = obtenerHistorial(from);
+
+      // Extraer resumen legible (para notificar al dueño)
+      const resumen = await extraerResumen(historialActualizado, aiReply);
+
+      // Extraer datos estructurados y guardar en Supabase
+      const datos = await extraerDatosReserva(historialActualizado, aiReply);
+      if (datos) {
+        const telefono = datos.telefono ?? telefonoCliente;
+        await guardarReservaEnSupabase({ ...datos, telefono });
+      }
+
+      // Notificar al dueño (sin bloquear la respuesta al cliente)
       notificarDueno(resumen).catch((e) =>
         console.error("[Notificación dueño] Fallo silencioso:", e)
       );
@@ -212,8 +373,31 @@ export async function POST(req: NextRequest) {
     return twimlResponse(aiReply);
   } catch (error) {
     console.error("[WhatsApp] Error:", error);
-    return twimlResponse("Ha habido un problema técnico. Llámanos al 910 123 456.");
+    return twimlResponse(
+      "Ha habido un problema técnico. Llámanos al 910 123 456."
+    );
   }
+}
+
+// ─── Buscar reserva pendiente de confirmación para ese teléfono ───────────────
+async function buscarReservaPendiente(
+  telefono: string
+): Promise<{ id: string; fecha: string; hora: string } | null> {
+  const hoy = new Date().toISOString().split("T")[0];
+
+  const { data, error } = await supabase
+    .from("reservas")
+    .select("id, fecha, hora")
+    .eq("telefono", telefono)
+    .eq("estado", "pendiente")
+    .eq("recordatorio_enviado", true)
+    .gte("fecha", hoy)
+    .order("fecha", { ascending: true })
+    .limit(1)
+    .single();
+
+  if (error || !data) return null;
+  return data;
 }
 
 export async function GET() {
