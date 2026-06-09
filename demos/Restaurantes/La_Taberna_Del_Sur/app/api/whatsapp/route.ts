@@ -5,9 +5,9 @@ import { supabase } from "@/lib/supabase";
 const GEMINI_MODELS = [
   "gemini-2.5-flash-lite",
   "gemini-2.5-flash",
-  "gemini-3.1-flash-lite",
+  "gemini-2.0-flash",   // ← corregido: gemini-3.1-flash-lite no existe
 ];
- 
+
 // ─── Historial por número ────────────────────────────────────────────────────
 const conversaciones = new Map<
   string,
@@ -62,8 +62,6 @@ FLUJO: Recoge nombre completo, personas, fecha, hora y teléfono. Si el cliente 
 REGLAS: Respuestas ≤3 líneas. Tutea. Hora fuera de rango→ofrece la más cercana. +15 personas→llamen al 910123456. Cancelar/modificar→pide nombre+teléfono. Responde en el idioma del cliente.`;
 }
 
-
-
 // ─── Llamada a Gemini con fallback de modelos ────────────────────────────────
 async function geminiCall(
   contents: Array<{ role: string; parts: Array<{ text: string }> }>,
@@ -99,6 +97,7 @@ async function geminiCall(
         data?.error?.code === 404
       ) {
         console.warn(`[Gemini] ${model} no disponible (${data.error.code}), probando siguiente...`);
+        await sleep(1500); // ← espera antes de reintentar
         continue;
       }
 
@@ -120,6 +119,10 @@ async function geminiCall(
   return null;
 }
 
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 // ─── Bot principal ───────────────────────────────────────────────────────────
 async function askGemini(
   userMessage: string,
@@ -132,7 +135,7 @@ async function askGemini(
 
   const text = await geminiCall(
     contents,
-    { maxOutputTokens: 400, temperature: 0.5 },  // ← aumentado para que no se corte la confirmación
+    { maxOutputTokens: 400, temperature: 0.5 },
     getSystemPrompt()
   );
 
@@ -153,15 +156,49 @@ function reservaConfirmada(respuesta: string): boolean {
 
 // ─── Detectar respuesta a recordatorio ───────────────────────────────────────
 function esConfirmacionPositiva(mensaje: string): boolean {
-  const positivos = ["sí", "si", "yes", "claro", "confirmo", "allí estaré",
-    "alli estare", "por supuesto", "ahí estaré", "ahi estare", "vamos", "ok", "vale"];
+  const positivos = [
+    "sí", "si", "yes", "claro", "confirmo", "allí estaré",
+    "alli estare", "por supuesto", "ahí estaré", "ahi estare",
+    "vamos", "ok", "vale",
+  ];
   return positivos.some((p) => mensaje.toLowerCase().includes(p));
 }
 
 function esCancelacion(mensaje: string): boolean {
-  const negativos = ["no", "cancelar", "cancelad", "no puedo", "no voy",
-    "no iremos", "imposible", "cancel"];
+  const negativos = [
+    "no", "cancelar", "cancelad", "no puedo", "no voy",
+    "no iremos", "imposible", "cancel",
+  ];
   return negativos.some((n) => mensaje.toLowerCase().includes(n));
+}
+
+// ─── Detectar modificación (personas) en la respuesta ────────────────────────
+function esModificacion(texto: string): boolean {
+  const keywords = [
+    "en vez de", "en lugar de", "seremos", "somos",
+    "cambia", "cambiar", "modificar", "actualiza",
+    "uno menos", "uno más", "una más", "una menos",
+    "ya no viene", "se apunta", "se cae", "al final",
+  ];
+  return keywords.some((k) => texto.toLowerCase().includes(k));
+}
+
+// ─── Extraer número de personas actualizado ───────────────────────────────────
+async function extraerPersonasActualizadas(
+  respuesta: string,
+  personasActuales: number
+): Promise<number | null> {
+  const prompt = `El cliente tiene una reserva para ${personasActuales} personas y ha enviado este mensaje: "${respuesta}".
+¿Cuántas personas serán ahora en total? Responde SOLO con el número entero, sin texto adicional.
+Si no se puede determinar con certeza, responde "null".`;
+
+  const resultado = await geminiCall(
+    [{ role: "user", parts: [{ text: prompt }] }],
+    { maxOutputTokens: 10, temperature: 0 }
+  );
+  if (!resultado) return null;
+  const num = parseInt(resultado.trim());
+  return isNaN(num) ? null : num;
 }
 
 // ─── Extraer resumen legible para notificar al dueño ─────────────────────────
@@ -235,11 +272,9 @@ Si algún dato no está disponible usa null. La fecha debe estar en formato YYYY
   }
 }
 
-// ─── Construir reserva_at (timestamptz) para el cron ─────────────────────────
-// datos.fecha viene en YYYY-MM-DD y datos.hora en HH:MM (extraídos por Gemini)
+// ─── Construir reserva_at ────────────────────────────────────────────────────
 function buildReservaAt(fecha: string, hora: string): string | null {
   try {
-    // "2025-06-10" + "21:00" → ISO con zona Madrid (UTC+2 verano)
     return `${fecha}T${hora}:00+02:00`;
   } catch {
     return null;
@@ -265,8 +300,8 @@ async function guardarReservaEnSupabase(datos: {
       personas: datos.personas,
       fecha: datos.fecha,
       hora: datos.hora,
-      estado: "pendiente",          // ← cambiado: el cron lo busca por "pendiente"
-      reserva_at: reservaAt,        // ← nuevo: necesario para que el cron calcule cuándo mandar el recordatorio
+      estado: "pendiente",
+      reserva_at: reservaAt,
       recordatorio_enviado: false,
     })
     .select("id")
@@ -332,12 +367,12 @@ function twimlResponse(message: string): NextResponse {
 // ─── Buscar reserva pendiente de confirmación para ese teléfono ───────────────
 async function buscarReservaPendiente(
   telefono: string
-): Promise<{ id: string; fecha: string; hora: string } | null> {
+): Promise<{ id: string; fecha: string; hora: string; personas: number } | null> {
   const hoy = new Date().toISOString().split("T")[0];
 
   const { data, error } = await supabase
     .from("reservas")
-    .select("id, fecha, hora")
+    .select("id, fecha, hora, personas")
     .eq("telefono", telefono)
     .eq("estado", "pendiente")
     .eq("recordatorio_enviado", true)
@@ -368,6 +403,22 @@ export async function POST(req: NextRequest) {
     // ── ¿Está respondiendo a un recordatorio? ───────────────────────────────
     const reservaPendiente = await buscarReservaPendiente(telefonoCliente);
     if (reservaPendiente) {
+      if (esModificacion(body)) {
+        // Intenta extraer el número de personas actualizado
+        const nuevasPersonas = await extraerPersonasActualizadas(body, reservaPendiente.personas);
+
+        if (nuevasPersonas && nuevasPersonas !== reservaPendiente.personas) {
+          await supabase
+            .from("reservas")
+            .update({ estado: "confirmada", personas: nuevasPersonas })
+            .eq("id", reservaPendiente.id);
+          return twimlResponse(
+            `✅ ¡Anotado! He actualizado vuestra reserva a ${nuevasPersonas} personas. ¡Os esperamos a las ${reservaPendiente.hora}! 🍷`
+          );
+        }
+        // Si no se extrae número claro, cae al flujo de confirmación positiva
+      }
+
       if (esConfirmacionPositiva(body)) {
         await supabase
           .from("reservas")
@@ -377,6 +428,7 @@ export async function POST(req: NextRequest) {
           `¡Perfecto! Tu reserva del ${reservaPendiente.fecha} a las ${reservaPendiente.hora} queda confirmada. ¡Te esperamos! 🍷`
         );
       }
+
       if (esCancelacion(body)) {
         await supabase
           .from("reservas")
@@ -403,7 +455,7 @@ export async function POST(req: NextRequest) {
         const telefono = datos.telefono ?? telefonoCliente;
         await guardarReservaEnSupabase({ ...datos, telefono });
       } else {
-        console.error('[Supabase] extraerDatosReserva devolvió null');
+        console.error("[Supabase] extraerDatosReserva devolvió null");
       }
       notificarDueno(resumen).catch((e) =>
         console.error("[Notificación dueño] Fallo silencioso:", e)
