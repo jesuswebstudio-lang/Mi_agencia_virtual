@@ -364,7 +364,7 @@ function twimlResponse(message: string): NextResponse {
   );
 }
 
-// ─── Buscar reserva pendiente de confirmación para ese teléfono ───────────────
+// ─── Buscar reserva pendiente de confirmación (recordatorio enviado) ──────────
 async function buscarReservaPendiente(
   telefono: string
 ): Promise<{ id: string; fecha: string; hora: string; personas: number } | null> {
@@ -383,6 +383,37 @@ async function buscarReservaPendiente(
 
   if (error || !data) return null;
   return data;
+}
+
+// ─── Buscar cualquier reserva activa del cliente (para cancelar/modificar) ────
+async function buscarReservaActiva(
+  telefono: string
+): Promise<{ id: string; fecha: string; hora: string; personas: number; nombre: string } | null> {
+  const hoy = new Date().toISOString().split("T")[0];
+
+  const { data, error } = await supabase
+    .from("reservas")
+    .select("id, fecha, hora, personas, nombre")
+    .eq("telefono", telefono)
+    .in("estado", ["nueva", "pendiente"])
+    .gte("fecha", hoy)
+    .order("fecha", { ascending: true })
+    .limit(1)
+    .single();
+
+  if (error || !data) return null;
+  return data;
+}
+
+// ─── Detectar intención de cancelar en el mensaje del cliente ─────────────────
+function quiereCancelar(mensaje: string): boolean {
+  const keywords = [
+    "cancelar", "cancela", "cancelad", "anular", "anula",
+    "no voy", "no vamos", "no podemos", "no puedo ir",
+    "no voy a poder", "no podremos",
+  ];
+  const lower = mensaje.toLowerCase();
+  return keywords.some((k) => lower.includes(k));
 }
 
 // ─── Handler principal ───────────────────────────────────────────────────────
@@ -441,6 +472,21 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Flujo normal de reserva ──────────────────────────────────────────────
+    // ── ¿El cliente quiere cancelar directamente (sin recordatorio previo)? ──
+    if (quiereCancelar(body)) {
+      const reservaActiva = await buscarReservaActiva(telefonoCliente);
+      if (reservaActiva) {
+        await supabase
+          .from("reservas")
+          .update({ estado: "cancelada" })
+          .eq("id", reservaActiva.id);
+        return twimlResponse(
+          `Entendido ${reservaActiva.nombre}, hemos cancelado tu reserva del ${reservaActiva.fecha} a las ${reservaActiva.hora}. Si quieres reservar otro día estaremos encantados. Hasta pronto!`
+        );
+      }
+      // Si no hay reserva activa, Gemini responde normalmente
+    }
+
     const historial = obtenerHistorial(from);
     const aiReply = await askGemini(body, historial);
     guardarMensajes(from, body, aiReply);
