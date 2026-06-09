@@ -120,6 +120,7 @@
     .btn-action { padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border); background: transparent; font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; color: var(--muted); transition: all .15s; }
     .btn-action:hover { border-color: var(--gold); color: var(--gold); }
     .btn-action.danger:hover { border-color: var(--cancelada); color: var(--cancelada); }
+    .btn-action:disabled { opacity: .4; cursor: not-allowed; }
 
     /* ── EMPTY STATE ─────────────────────────────── */
     .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 24px; color: var(--muted); gap: 12px; }
@@ -187,6 +188,10 @@
     .toast-title { font-weight: 600; color: var(--gold); margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
     .toast-body { color: var(--text); line-height: 1.4; }
 
+    /* Toast de acción (confirmar/cancelar) */
+    .toast-action { border-left-color: var(--confirmada); }
+    .toast-action.danger { border-left-color: var(--cancelada); }
+
     /* ── LOADING ─────────────────────────────────── */
     .loading-row td { text-align: center; padding: 60px; color: var(--muted); font-size: 13px; }
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -238,6 +243,7 @@
       .card-btn { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid var(--border); background: transparent; font-size: 12.5px; cursor: pointer; font-family: 'DM Sans', sans-serif; color: var(--muted); text-align: center; transition: all .15s; }
       .card-btn:hover { border-color: var(--gold); color: var(--gold); }
       .card-btn.danger:hover { border-color: var(--cancelada); color: var(--cancelada); }
+      .card-btn:disabled { opacity: .4; cursor: not-allowed; }
 
       .mobile-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 10px 0 calc(10px + env(safe-area-inset-bottom)); justify-content: space-around; z-index: 100; }
       .mnav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px; color: var(--muted); cursor: pointer; padding: 4px 16px; }
@@ -410,7 +416,7 @@
 
 <!-- Toast -->
 <div class="toast" id="toast">
-  <div class="toast-title">🍽️ Nueva reserva</div>
+  <div class="toast-title" id="toastTitle">🍽️ Nueva reserva</div>
   <div class="toast-body" id="toastBody"></div>
 </div>
 
@@ -504,8 +510,8 @@ function renderTable(newId = null) {
       <td>${r.hora ?? '—'}</td>
       <td>${estadoBadge(r.estado)}</td>
       <td><div class="actions">
-        ${r.estado !== 'confirmada' && r.estado !== 'cancelada' ? `<button class="btn-action" onclick="window.changeEstado('${r.id}','confirmada')">Confirmar</button>` : ''}
-        ${r.estado !== 'cancelada' ? `<button class="btn-action danger" onclick="window.changeEstado('${r.id}','cancelada')">Cancelar</button>` : ''}
+        ${r.estado !== 'confirmada' && r.estado !== 'cancelada' ? `<button class="btn-action" onclick="window.changeEstado('${r.id}','confirmada',this)">Confirmar</button>` : ''}
+        ${r.estado !== 'cancelada' ? `<button class="btn-action danger" onclick="window.changeEstado('${r.id}','cancelada',this)">Cancelar</button>` : ''}
       </div></td>
     </tr>`).join('')
 }
@@ -523,8 +529,8 @@ function renderCards() {
           <div class="card-detail" style="grid-column:span 2">📅 ${formatFecha(r.fecha)}</div>
         </div>
         <div class="card-actions">
-          ${r.estado !== 'confirmada' && r.estado !== 'cancelada' ? `<button class="card-btn" onclick="window.changeEstado('${r.id}','confirmada')">✓ Confirmar</button>` : ''}
-          ${r.estado !== 'cancelada' ? `<button class="card-btn danger" onclick="window.changeEstado('${r.id}','cancelada')">✕ Cancelar</button>` : ''}
+          ${r.estado !== 'confirmada' && r.estado !== 'cancelada' ? `<button class="card-btn" onclick="window.changeEstado('${r.id}','confirmada',this)">✓ Confirmar</button>` : ''}
+          ${r.estado !== 'cancelada' ? `<button class="card-btn danger" onclick="window.changeEstado('${r.id}','cancelada',this)">✕ Cancelar</button>` : ''}
         </div>
       </div>`).join('')
 }
@@ -624,15 +630,11 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
   showLoginOverlay()
 })
 
-// Mostrar panel o login al navegar a configuración
-const origGoTo = goTo
-window._goToConfig = () => {
-  if (checkLogin()) showConfigPanel(); else showLoginOverlay()
-}
-
 // Override para configuracion
 document.querySelectorAll('[data-section="configuracion"]').forEach(el => {
-  el.addEventListener('click', () => { window._goToConfig() }, { capture: true })
+  el.addEventListener('click', () => {
+    if (checkLogin()) showConfigPanel(); else showLoginOverlay()
+  }, { capture: true })
 })
 
 // ── Configuración — Guardar/Cargar ────────────────────────────────────────────
@@ -670,21 +672,60 @@ window.guardarConfig = (key) => {
   setTimeout(() => ok.classList.remove('show'), 2500)
 }
 
-// ── Cambiar estado ────────────────────────────────────────────────────────────
-window.changeEstado = async (id, newEstado) => {
-  reservas = reservas.map(r => r.id === id ? { ...r, estado: newEstado } : r)
-  renderAll()
-  const { error } = await supabase.from('reservas').update({ estado: newEstado }).eq('id', id)
-  if (error) { console.error('Error actualizando estado:', error); await cargarReservas() }
-}
-
 // ── Toast ─────────────────────────────────────────────────────────────────────
 function mostrarToast(reserva) {
+  document.getElementById('toastTitle').textContent = '🍽️ Nueva reserva'
   document.getElementById('toastBody').innerHTML =
     `<strong>${reserva.nombre ?? 'Cliente'}</strong> — ${reserva.personas ?? '?'} personas<br>📅 ${formatFecha(reserva.fecha)} · 🕐 ${reserva.hora ?? '—'}`
   const toast = document.getElementById('toast')
+  toast.className = 'toast'
   toast.classList.add('show')
   setTimeout(() => toast.classList.remove('show'), 4500)
+}
+
+function mostrarToastAccion(texto, tipo = 'ok') {
+  document.getElementById('toastTitle').textContent = tipo === 'ok' ? '✅ Listo' : '❌ Cancelada'
+  document.getElementById('toastBody').textContent = texto
+  const toast = document.getElementById('toast')
+  toast.className = 'toast toast-action' + (tipo === 'danger' ? ' danger' : '')
+  toast.classList.add('show')
+  setTimeout(() => toast.classList.remove('show'), 4000)
+}
+
+// ── Cambiar estado — llama a /api/notificar y notifica al cliente ──────────────
+window.changeEstado = async (id, newEstado, btn) => {
+  const label = newEstado === 'confirmada' ? 'Confirmar' : 'Cancelar'
+  if (!confirm(`¿${label} esta reserva y notificar al cliente por WhatsApp?`)) return
+
+  // Deshabilitar botón mientras procesa
+  if (btn) { btn.disabled = true; btn.textContent = '…' }
+
+  try {
+    const res = await fetch('/api/notificar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, estado: newEstado })
+    })
+
+    if (!res.ok) throw new Error('Error del servidor')
+
+    // Actualizar UI localmente (Realtime también lo actualizará, pero esto es más rápido)
+    reservas = reservas.map(r => r.id === id ? { ...r, estado: newEstado } : r)
+    renderAll()
+
+    const reserva = reservas.find(r => r.id === id)
+    const nombre  = reserva?.nombre ?? 'El cliente'
+
+    if (newEstado === 'confirmada') {
+      mostrarToastAccion(`${nombre} notificado — reserva confirmada`, 'ok')
+    } else {
+      mostrarToastAccion(`${nombre} notificado — reserva cancelada`, 'danger')
+    }
+  } catch (err) {
+    console.error('[changeEstado] Error:', err)
+    if (btn) { btn.disabled = false; btn.textContent = label }
+    alert('Error al procesar la reserva. Inténtalo de nuevo.')
+  }
 }
 
 // ── Cargar reservas ───────────────────────────────────────────────────────────
