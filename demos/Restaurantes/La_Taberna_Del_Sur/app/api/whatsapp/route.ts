@@ -3,9 +3,9 @@ import { supabase } from "@/lib/supabase";
 
 // ─── Modelos Gemini con fallback ─────────────────────────────────────────────
 const GEMINI_MODELS = [
-  "gemini-2.5-flash",
-  "gemini-2.0-flash",
-  "gemini-1.5-flash",
+  "gemini-2.5-flash-lite",
+  "gemini-2.0-flash-lite",
+  "gemini-1.5-flash-lite",
 ];
  
 // ─── Historial por número ────────────────────────────────────────────────────
