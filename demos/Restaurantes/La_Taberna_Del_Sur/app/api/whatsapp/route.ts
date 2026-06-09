@@ -7,7 +7,7 @@ const GEMINI_MODELS = [
   "gemini-2.0-flash",
   "gemini-1.5-flash",
 ];
-
+ 
 // ─── Historial por número ────────────────────────────────────────────────────
 const conversaciones = new Map<
   string,
