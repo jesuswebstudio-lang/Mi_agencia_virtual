@@ -132,7 +132,7 @@ async function askGemini(
 
   const text = await geminiCall(
     contents,
-    { maxOutputTokens: 150, temperature: 0.5 },
+    { maxOutputTokens: 400, temperature: 0.5 },  // ← aumentado para que no se corte la confirmación
     getSystemPrompt()
   );
 
@@ -235,6 +235,17 @@ Si algún dato no está disponible usa null. La fecha debe estar en formato YYYY
   }
 }
 
+// ─── Construir reserva_at (timestamptz) para el cron ─────────────────────────
+// datos.fecha viene en YYYY-MM-DD y datos.hora en HH:MM (extraídos por Gemini)
+function buildReservaAt(fecha: string, hora: string): string | null {
+  try {
+    // "2025-06-10" + "21:00" → ISO con zona Madrid (UTC+2 verano)
+    return `${fecha}T${hora}:00+02:00`;
+  } catch {
+    return null;
+  }
+}
+
 // ─── Guardar reserva en Supabase ──────────────────────────────────────────────
 async function guardarReservaEnSupabase(datos: {
   nombre: string;
@@ -243,6 +254,8 @@ async function guardarReservaEnSupabase(datos: {
   hora: string;
   telefono: string;
 }): Promise<string | null> {
+  const reservaAt = buildReservaAt(datos.fecha, datos.hora);
+
   const { data, error } = await supabase
     .from("reservas")
     .insert({
@@ -252,7 +265,8 @@ async function guardarReservaEnSupabase(datos: {
       personas: datos.personas,
       fecha: datos.fecha,
       hora: datos.hora,
-      estado: "nueva",
+      estado: "pendiente",          // ← cambiado: el cron lo busca por "pendiente"
+      reserva_at: reservaAt,        // ← nuevo: necesario para que el cron calcule cuándo mandar el recordatorio
       recordatorio_enviado: false,
     })
     .select("id")
