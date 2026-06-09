@@ -402,8 +402,9 @@ export async function POST(req: NextRequest) {
       if (datos) {
         const telefono = datos.telefono ?? telefonoCliente;
         await guardarReservaEnSupabase({ ...datos, telefono });
+      } else {
+        console.error('[Supabase] extraerDatosReserva devolvió null');
       }
-
       notificarDueno(resumen).catch((e) =>
         console.error("[Notificación dueño] Fallo silencioso:", e)
       );
