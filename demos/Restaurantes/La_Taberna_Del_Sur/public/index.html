@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -43,231 +43,69 @@
       flex-direction: column;
       padding: 28px 0 24px;
     }
+    .logo { padding: 0 24px 28px; border-bottom: 1px solid var(--border); }
+    .logo-icon { font-size: 26px; line-height: 1; margin-bottom: 6px; }
+    .logo-name { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; color: var(--gold); line-height: 1.2; }
+    .logo-sub { font-size: 11px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
 
-    .logo {
-      padding: 0 24px 28px;
-      border-bottom: 1px solid var(--border);
-    }
-    .logo-icon {
-      font-size: 26px;
-      line-height: 1;
-      margin-bottom: 6px;
-    }
-    .logo-name {
-      font-family: 'Playfair Display', serif;
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--gold);
-      line-height: 1.2;
-    }
-    .logo-sub {
-      font-size: 11px;
-      color: var(--muted);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin-top: 2px;
-    }
-
-    .nav {
-      flex: 1;
-      padding: 20px 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
+    .nav { flex: 1; padding: 20px 12px; display: flex; flex-direction: column; gap: 4px; }
     .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 8px;
-      font-size: 13.5px;
-      color: var(--muted);
-      cursor: pointer;
-      transition: all .15s;
-      user-select: none;
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 8px; font-size: 13.5px;
+      color: var(--muted); cursor: pointer; transition: all .15s; user-select: none;
     }
     .nav-item:hover { background: var(--surface2); color: var(--text); }
     .nav-item.active { background: rgba(201,168,76,.12); color: var(--gold); }
     .nav-icon { font-size: 16px; width: 20px; text-align: center; }
 
-    .sidebar-footer {
-      padding: 16px 24px 0;
-      border-top: 1px solid var(--border);
-    }
-    .bot-status {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      color: var(--muted);
-    }
-    .dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--confirmada);
-      box-shadow: 0 0 6px var(--confirmada);
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0%,100% { opacity:1; } 50% { opacity:.4; }
-    }
+    .sidebar-footer { padding: 16px 24px 0; border-top: 1px solid var(--border); }
+    .bot-status { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--confirmada); box-shadow: 0 0 6px var(--confirmada); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.4; } }
 
     /* ── MAIN ────────────────────────────────────── */
-    .main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
-    .topbar {
-      padding: 20px 28px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-    }
-    .page-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 22px;
-      font-weight: 500;
-    }
-    .topbar-right {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+    .topbar { padding: 20px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .page-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 500; }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
 
-    .filter-tabs {
-      display: flex;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    .filter-tab {
-      padding: 7px 14px;
-      font-size: 12.5px;
-      cursor: pointer;
-      color: var(--muted);
-      border: none;
-      background: transparent;
-      font-family: 'DM Sans', sans-serif;
-      transition: all .15s;
-    }
+    .filter-tabs { display: flex; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .filter-tab { padding: 7px 14px; font-size: 12.5px; cursor: pointer; color: var(--muted); border: none; background: transparent; font-family: 'DM Sans', sans-serif; transition: all .15s; }
     .filter-tab.active { background: var(--surface2); color: var(--text); }
     .filter-tab:hover:not(.active) { color: var(--text); }
 
+    /* ── SECTIONS ────────────────────────────────── */
+    .section { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+    .section.active { display: flex; }
+
     /* ── METRICS ─────────────────────────────────── */
-    .metrics {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1px;
-      background: var(--border);
-      border-bottom: 1px solid var(--border);
-    }
-    .metric {
-      background: var(--surface);
-      padding: 20px 24px;
-    }
-    .metric-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      color: var(--muted);
-      margin-bottom: 6px;
-    }
-    .metric-value {
-      font-family: 'Playfair Display', serif;
-      font-size: 28px;
-      font-weight: 700;
-      line-height: 1;
-    }
-    .metric-sub {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 4px;
-    }
+    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }
+    .metric { background: var(--surface); padding: 20px 24px; }
+    .metric-label { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 6px; }
+    .metric-value { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; line-height: 1; }
+    .metric-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
     .metric-value.gold { color: var(--gold); }
     .metric-value.blue { color: var(--nueva); }
     .metric-value.green { color: var(--confirmada); }
     .metric-value.orange { color: var(--pendiente); }
 
     /* ── TABLE ───────────────────────────────────── */
-    .table-wrap {
-      flex: 1;
-      overflow-y: auto;
-      padding: 0;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    thead {
-      position: sticky;
-      top: 0;
-      background: var(--surface);
-      z-index: 10;
-    }
-    th {
-      padding: 12px 20px;
-      text-align: left;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      color: var(--muted);
-      font-weight: 500;
-      border-bottom: 1px solid var(--border);
-    }
-    tr {
-      border-bottom: 1px solid var(--border);
-      transition: background .1s;
-    }
+    .table-wrap { flex: 1; overflow-y: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    thead { position: sticky; top: 0; background: var(--surface); z-index: 10; }
+    th { padding: 12px 20px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 500; border-bottom: 1px solid var(--border); }
+    tr { border-bottom: 1px solid var(--border); transition: background .1s; }
     tr:last-child { border-bottom: none; }
     tbody tr:hover { background: var(--surface2); }
-    td {
-      padding: 14px 20px;
-      font-size: 13.5px;
-      vertical-align: middle;
-    }
+    td { padding: 14px 20px; font-size: 13.5px; vertical-align: middle; }
 
-    .avatar {
-      width: 32px; height: 32px;
-      border-radius: 50%;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      color: var(--gold);
-      font-weight: 500;
-      flex-shrink: 0;
-    }
-    .name-cell {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+    .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--surface2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 13px; color: var(--gold); font-weight: 500; flex-shrink: 0; }
+    .name-cell { display: flex; align-items: center; gap: 10px; }
     .name-text { font-weight: 500; }
 
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 500;
-    }
-    .badge::before {
-      content: '';
-      width: 6px; height: 6px;
-      border-radius: 50%;
-    }
+    .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+    .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
     .badge.nueva    { background: rgba(74,158,255,.12); color: var(--nueva); }
     .badge.nueva::before { background: var(--nueva); }
     .badge.pendiente { background: rgba(240,160,48,.12); color: var(--pendiente); }
@@ -277,92 +115,84 @@
     .badge.cancelada { background: rgba(208,80,80,.12); color: var(--cancelada); }
     .badge.cancelada::before { background: var(--cancelada); }
 
-    .people-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 13px;
-      color: var(--text);
-    }
-
-    .actions {
-      display: flex;
-      gap: 6px;
-    }
-    .btn-action {
-      padding: 5px 12px;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-      background: transparent;
-      font-size: 12px;
-      cursor: pointer;
-      font-family: 'DM Sans', sans-serif;
-      color: var(--muted);
-      transition: all .15s;
-    }
+    .people-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: var(--text); }
+    .actions { display: flex; gap: 6px; }
+    .btn-action { padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border); background: transparent; font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; color: var(--muted); transition: all .15s; }
     .btn-action:hover { border-color: var(--gold); color: var(--gold); }
     .btn-action.danger:hover { border-color: var(--cancelada); color: var(--cancelada); }
 
     /* ── EMPTY STATE ─────────────────────────────── */
-    .empty-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 80px 24px;
-      color: var(--muted);
-      gap: 12px;
-    }
+    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 24px; color: var(--muted); gap: 12px; }
     .empty-state-icon { font-size: 40px; opacity: .4; }
     .empty-state-text { font-size: 14px; }
 
-    /* ── TOAST ───────────────────────────────────── */
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: var(--surface2);
-      border: 1px solid var(--gold-dim);
-      border-left: 3px solid var(--gold);
-      border-radius: 10px;
-      padding: 14px 18px;
-      font-size: 13.5px;
-      max-width: 320px;
-      box-shadow: 0 8px 32px rgba(0,0,0,.5);
-      z-index: 999;
-      transform: translateY(100px);
-      opacity: 0;
-      transition: all .35s cubic-bezier(.34,1.56,.64,1);
-      pointer-events: none;
+    /* ── ESTADÍSTICAS ────────────────────────────── */
+    .stats-grid { flex: 1; overflow-y: auto; padding: 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-content: start; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
+    .stat-card-title { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 20px; }
+    .stat-card.full { grid-column: span 2; }
+
+    .bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .bar-label { font-size: 13px; color: var(--text); min-width: 90px; }
+    .bar-track { flex: 1; height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 3px; transition: width .6s ease; }
+    .bar-val { font-size: 12px; color: var(--muted); min-width: 30px; text-align: right; }
+
+    .hora-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); gap: 8px; }
+    .hora-cell { background: var(--surface2); border-radius: 6px; padding: 8px 4px; text-align: center; font-size: 11px; color: var(--muted); }
+    .hora-cell .hora-val { font-size: 16px; font-weight: 500; color: var(--gold); display: block; margin-bottom: 2px; }
+
+    .tasa-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .tasa-row:last-child { border-bottom: none; }
+    .tasa-label { font-size: 13.5px; }
+    .tasa-pct { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--gold); }
+
+    /* ── CONFIGURACIÓN ───────────────────────────── */
+    .config-wrap { flex: 1; overflow-y: auto; padding: 28px; display: flex; flex-direction: column; gap: 20px; max-width: 680px; }
+
+    /* Login overlay */
+    .login-overlay { flex: 1; display: flex; align-items: center; justify-content: center; }
+    .login-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 36px 32px; width: 340px; }
+    .login-title { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 6px; }
+    .login-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+    .login-error { font-size: 12px; color: var(--cancelada); margin-top: 10px; min-height: 16px; }
+
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .06em; }
+    .field input, .field textarea, .field select {
+      width: 100%; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 14px; font-size: 14px; color: var(--text);
+      font-family: 'DM Sans', sans-serif; outline: none; transition: border-color .15s;
     }
+    .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--gold-dim); }
+    .field textarea { resize: vertical; min-height: 80px; }
+
+    .btn-primary { width: 100%; padding: 11px; background: var(--gold); color: #0f0e0c; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity .15s; }
+    .btn-primary:hover { opacity: .88; }
+
+    .config-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
+    .config-section-title { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 20px; }
+    .config-actions { display: flex; gap: 10px; margin-top: 8px; }
+    .btn-save { padding: 9px 20px; background: var(--gold); color: #0f0e0c; border: none; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity .15s; }
+    .btn-save:hover { opacity: .85; }
+    .btn-logout { padding: 9px 20px; background: transparent; color: var(--muted); border: 1px solid var(--border); border-radius: 8px; font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .15s; margin-left: auto; }
+    .btn-logout:hover { color: var(--cancelada); border-color: var(--cancelada); }
+
+    .save-ok { font-size: 12px; color: var(--confirmada); margin-top: 8px; min-height: 16px; opacity: 0; transition: opacity .3s; }
+    .save-ok.show { opacity: 1; }
+
+    /* ── TOAST ───────────────────────────────────── */
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface2); border: 1px solid var(--gold-dim); border-left: 3px solid var(--gold); border-radius: 10px; padding: 14px 18px; font-size: 13.5px; max-width: 320px; box-shadow: 0 8px 32px rgba(0,0,0,.5); z-index: 999; transform: translateY(100px); opacity: 0; transition: all .35s cubic-bezier(.34,1.56,.64,1); pointer-events: none; }
     .toast.show { transform: translateY(0); opacity: 1; }
     .toast-title { font-weight: 600; color: var(--gold); margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
     .toast-body { color: var(--text); line-height: 1.4; }
 
     /* ── LOADING ─────────────────────────────────── */
-    .loading-row td {
-      text-align: center;
-      padding: 60px;
-      color: var(--muted);
-      font-size: 13px;
-    }
+    .loading-row td { text-align: center; padding: 60px; color: var(--muted); font-size: 13px; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .spinner {
-      display: inline-block;
-      width: 16px; height: 16px;
-      border: 2px solid var(--border);
-      border-top-color: var(--gold);
-      border-radius: 50%;
-      animation: spin .8s linear infinite;
-      vertical-align: middle;
-      margin-right: 8px;
-    }
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin .8s linear infinite; vertical-align: middle; margin-right: 8px; }
 
-    /* ── NUEVA fila animada ───────────────────────── */
-    @keyframes fadeInRow {
-      from { background: rgba(201,168,76,.15); }
-      to   { background: transparent; }
-    }
+    @keyframes fadeInRow { from { background: rgba(201,168,76,.15); } to { background: transparent; } }
     .row-new { animation: fadeInRow 2s ease-out forwards; }
 
     /* ── MOBILE ──────────────────────────────────── */
@@ -375,155 +205,51 @@
       .topbar     { display: none; }
       .metrics    { display: none; }
       .table-wrap { display: none; }
+      .stats-grid { grid-template-columns: 1fr; padding: 16px; }
+      .stat-card.full { grid-column: span 1; }
       .mobile-header { display: flex; }
       .mobile-nav    { display: flex; }
       .cards-list    { display: flex; }
       .toast { bottom: 90px; right: 12px; left: 12px; max-width: none; }
-
-      body { flex-direction: column; background: var(--bg); }
+      body { flex-direction: column; }
       .main { height: 100dvh; overflow: hidden; }
 
-      .mobile-header {
-        background: var(--surface);
-        border-bottom: 1px solid var(--border);
-        padding: 16px 20px;
-        align-items: center;
-        justify-content: space-between;
-      }
-      .mobile-logo {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-      .mobile-logo-text {
-        font-family: 'Playfair Display', serif;
-        font-size: 15px;
-        color: var(--gold);
-      }
+      .mobile-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 20px; align-items: center; justify-content: space-between; }
+      .mobile-logo { display: flex; align-items: center; gap: 10px; }
+      .mobile-logo-text { font-family: 'Playfair Display', serif; font-size: 15px; color: var(--gold); }
 
-      .mobile-metrics {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1px;
-        background: var(--border);
-        border-bottom: 1px solid var(--border);
-      }
-      .mobile-metric {
-        background: var(--surface);
-        padding: 14px 16px;
-      }
-      .mobile-metric-label {
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: .08em;
-        color: var(--muted);
-        margin-bottom: 4px;
-      }
-      .mobile-metric-value {
-        font-family: 'Playfair Display', serif;
-        font-size: 24px;
-        font-weight: 700;
-      }
+      .mobile-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }
+      .mobile-metric { background: var(--surface); padding: 14px 16px; }
+      .mobile-metric-label { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 4px; }
+      .mobile-metric-value { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; }
 
-      .mobile-filter {
-        padding: 12px 16px;
-        border-bottom: 1px solid var(--border);
-        display: flex;
-        gap: 8px;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-      }
+      .mobile-filter { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
       .mobile-filter::-webkit-scrollbar { display: none; }
-      .mf-tab {
-        padding: 6px 14px;
-        border-radius: 20px;
-        border: 1px solid var(--border);
-        background: transparent;
-        font-size: 12px;
-        color: var(--muted);
-        cursor: pointer;
-        white-space: nowrap;
-        font-family: 'DM Sans', sans-serif;
-        flex-shrink: 0;
-        transition: all .15s;
-      }
+      .mf-tab { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); background: transparent; font-size: 12px; color: var(--muted); cursor: pointer; white-space: nowrap; font-family: 'DM Sans', sans-serif; flex-shrink: 0; transition: all .15s; }
       .mf-tab.active { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,.08); }
 
-      .cards-list {
-        flex: 1;
-        flex-direction: column;
-        gap: 0;
-        overflow-y: auto;
-        padding: 0 0 80px;
-      }
-      .card {
-        background: var(--surface);
-        border-bottom: 1px solid var(--border);
-        padding: 16px 20px;
-      }
-      .card-top {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 10px;
-      }
-      .card-name {
-        font-weight: 500;
-        font-size: 15px;
-      }
-      .card-details {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-        margin-bottom: 12px;
-        font-size: 13px;
-        color: var(--muted);
-      }
+      .cards-list { flex: 1; flex-direction: column; gap: 0; overflow-y: auto; padding: 0 0 80px; }
+      .card { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 20px; }
+      .card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+      .card-name { font-weight: 500; font-size: 15px; }
+      .card-details { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; font-size: 13px; color: var(--muted); }
       .card-detail { display: flex; align-items: center; gap: 6px; }
       .card-actions { display: flex; gap: 8px; }
-      .card-btn {
-        flex: 1;
-        padding: 8px;
-        border-radius: 8px;
-        border: 1px solid var(--border);
-        background: transparent;
-        font-size: 12.5px;
-        cursor: pointer;
-        font-family: 'DM Sans', sans-serif;
-        color: var(--muted);
-        text-align: center;
-        transition: all .15s;
-      }
+      .card-btn { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid var(--border); background: transparent; font-size: 12.5px; cursor: pointer; font-family: 'DM Sans', sans-serif; color: var(--muted); text-align: center; transition: all .15s; }
       .card-btn:hover { border-color: var(--gold); color: var(--gold); }
       .card-btn.danger:hover { border-color: var(--cancelada); color: var(--cancelada); }
 
-      .mobile-nav {
-        position: fixed;
-        bottom: 0; left: 0; right: 0;
-        background: var(--surface);
-        border-top: 1px solid var(--border);
-        padding: 10px 0 calc(10px + env(safe-area-inset-bottom));
-        justify-content: space-around;
-        z-index: 100;
-      }
-      .mnav-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 3px;
-        font-size: 10px;
-        color: var(--muted);
-        cursor: pointer;
-        padding: 4px 16px;
-      }
+      .mobile-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 10px 0 calc(10px + env(safe-area-inset-bottom)); justify-content: space-around; z-index: 100; }
+      .mnav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px; color: var(--muted); cursor: pointer; padding: 4px 16px; }
       .mnav-item.active { color: var(--gold); }
       .mnav-icon { font-size: 20px; }
+      .config-wrap { padding: 16px; }
     }
   </style>
 </head>
 <body>
 
-<!-- ── SIDEBAR (desktop) ───────────────────────── -->
+<!-- ── SIDEBAR ─────────────────────────────────── -->
 <aside class="sidebar">
   <div class="logo">
     <div class="logo-icon">🍷</div>
@@ -531,14 +257,14 @@
     <div class="logo-sub">Panel de gestión</div>
   </div>
   <nav class="nav">
-    <div class="nav-item active"><span class="nav-icon">📋</span> Reservas</div>
-    <div class="nav-item"><span class="nav-icon">📊</span> Estadísticas</div>
-    <div class="nav-item"><span class="nav-icon">⚙️</span> Configuración</div>
+    <div class="nav-item active" data-section="reservas"><span class="nav-icon">📋</span> Reservas</div>
+    <div class="nav-item" data-section="estadisticas"><span class="nav-icon">📊</span> Estadísticas</div>
+    <div class="nav-item" data-section="configuracion"><span class="nav-icon">⚙️</span> Configuración</div>
   </nav>
   <div class="sidebar-footer">
     <div class="bot-status">
       <div class="dot"></div>
-      Bot activo · Fluxia
+      Bot activo · WhatsApp
     </div>
   </div>
 </aside>
@@ -558,96 +284,167 @@
   <!-- Mobile metrics -->
   <div class="mobile-metrics" id="mobileMetrics" style="display:none"></div>
 
-  <!-- Desktop topbar -->
-  <div class="topbar">
-    <h1 class="page-title">Reservas</h1>
-    <div class="topbar-right">
-      <div class="filter-tabs" id="filterTabs">
-        <button class="filter-tab active" data-filter="all">Todas</button>
-        <button class="filter-tab" data-filter="nueva">Nuevas</button>
-        <button class="filter-tab" data-filter="pendiente">Pendientes</button>
-        <button class="filter-tab" data-filter="confirmada">Confirmadas</button>
-        <button class="filter-tab" data-filter="cancelada">Canceladas</button>
+  <!-- ── SECCIÓN RESERVAS ── -->
+  <div class="section active" id="sec-reservas">
+    <div class="topbar">
+      <h1 class="page-title">Reservas</h1>
+      <div class="topbar-right">
+        <div class="filter-tabs" id="filterTabs">
+          <button class="filter-tab active" data-filter="all">Todas</button>
+          <button class="filter-tab" data-filter="nueva">Nuevas</button>
+          <button class="filter-tab" data-filter="pendiente">Pendientes</button>
+          <button class="filter-tab" data-filter="confirmada">Confirmadas</button>
+          <button class="filter-tab" data-filter="cancelada">Canceladas</button>
+        </div>
       </div>
+    </div>
+    <div class="metrics" id="metricsRow"></div>
+    <div class="mobile-filter" id="mobileFilter" style="display:none">
+      <button class="mf-tab active" data-filter="all">Todas</button>
+      <button class="mf-tab" data-filter="nueva">Nuevas</button>
+      <button class="mf-tab" data-filter="pendiente">Pendientes</button>
+      <button class="mf-tab" data-filter="confirmada">Confirmadas</button>
+      <button class="mf-tab" data-filter="cancelada">Canceladas</button>
+    </div>
+    <div class="table-wrap" id="tableWrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Cliente</th><th>Personas</th><th>Fecha</th><th>Hora</th><th>Estado</th><th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr class="loading-row"><td colspan="6"><span class="spinner"></span>Conectando…</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="cards-list" id="cardsList"></div>
+  </div>
+
+  <!-- ── SECCIÓN ESTADÍSTICAS ── -->
+  <div class="section" id="sec-estadisticas">
+    <div class="topbar">
+      <h1 class="page-title">Estadísticas</h1>
+    </div>
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card full"><div class="stat-card-title">Reservas por estado</div><div id="statEstados"></div></div>
+      <div class="stat-card"><div class="stat-card-title">Hora punta</div><div class="hora-grid" id="statHoras"></div></div>
+      <div class="stat-card"><div class="stat-card-title">Tasas de conversión</div><div id="statTasas"></div></div>
+      <div class="stat-card full"><div class="stat-card-title">Reservas por día (últimos 7 días)</div><div id="statDias"></div></div>
     </div>
   </div>
 
-  <!-- Metrics row (desktop) -->
-  <div class="metrics" id="metricsRow"></div>
+  <!-- ── SECCIÓN CONFIGURACIÓN ── -->
+  <div class="section" id="sec-configuracion">
+    <div class="topbar">
+      <h1 class="page-title">Configuración</h1>
+    </div>
 
-  <!-- Mobile filter -->
-  <div class="mobile-filter" id="mobileFilter" style="display:none">
-    <button class="mf-tab active" data-filter="all">Todas</button>
-    <button class="mf-tab" data-filter="nueva">Nuevas</button>
-    <button class="mf-tab" data-filter="pendiente">Pendientes</button>
-    <button class="mf-tab" data-filter="confirmada">Confirmadas</button>
-    <button class="mf-tab" data-filter="cancelada">Canceladas</button>
+    <!-- Login overlay -->
+    <div class="login-overlay" id="loginOverlay">
+      <div class="login-box">
+        <div class="login-title">Acceso restringido</div>
+        <div class="login-sub">Esta sección es solo para el administrador del restaurante.</div>
+        <div class="field"><label>Usuario</label><input type="text" id="loginUser" placeholder="admin" /></div>
+        <div class="field"><label>Contraseña</label><input type="password" id="loginPass" placeholder="••••••••" /></div>
+        <button class="btn-primary" id="loginBtn">Entrar</button>
+        <div class="login-error" id="loginError"></div>
+      </div>
+    </div>
+
+    <!-- Config panel (oculto hasta login) -->
+    <div class="config-wrap" id="configPanel" style="display:none">
+
+      <div class="config-section">
+        <div class="config-section-title">Mensaje de bienvenida del bot</div>
+        <div class="field">
+          <label>Mensaje inicial</label>
+          <textarea id="cfgBienvenida" rows="3"></textarea>
+        </div>
+        <div class="config-actions">
+          <button class="btn-save" onclick="guardarConfig('bienvenida')">Guardar</button>
+          <div class="save-ok" id="ok-bienvenida">✓ Guardado</div>
+        </div>
+      </div>
+
+      <div class="config-section">
+        <div class="config-section-title">Horario del restaurante</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="field"><label>Apertura mediodía</label><input type="time" id="cfgApertura1" /></div>
+          <div class="field"><label>Cierre mediodía</label><input type="time" id="cfgCierre1" /></div>
+          <div class="field"><label>Apertura noche</label><input type="time" id="cfgApertura2" /></div>
+          <div class="field"><label>Cierre noche</label><input type="time" id="cfgCierre2" /></div>
+        </div>
+        <div class="config-actions">
+          <button class="btn-save" onclick="guardarConfig('horario')">Guardar</button>
+          <div class="save-ok" id="ok-horario">✓ Guardado</div>
+        </div>
+      </div>
+
+      <div class="config-section">
+        <div class="config-section-title">Datos del restaurante</div>
+        <div class="field"><label>Nombre</label><input type="text" id="cfgNombre" /></div>
+        <div class="field"><label>Dirección</label><input type="text" id="cfgDireccion" /></div>
+        <div class="field"><label>Teléfono de contacto</label><input type="tel" id="cfgTelefono" /></div>
+        <div class="field"><label>Máximo de comensales por reserva</label><input type="number" id="cfgMaxPersonas" min="1" max="100" /></div>
+        <div class="config-actions">
+          <button class="btn-save" onclick="guardarConfig('datos')">Guardar</button>
+          <div class="save-ok" id="ok-datos">✓ Guardado</div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;padding-bottom:8px">
+        <button class="btn-logout" id="logoutBtn">Cerrar sesión</button>
+      </div>
+
+    </div>
   </div>
-
-  <!-- Desktop table -->
-  <div class="table-wrap" id="tableWrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Cliente</th>
-          <th>Personas</th>
-          <th>Fecha</th>
-          <th>Hora</th>
-          <th>Estado</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody">
-        <tr class="loading-row">
-          <td colspan="6"><span class="spinner"></span>Conectando con Supabase…</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Mobile cards -->
-  <div class="cards-list" id="cardsList"></div>
 
   <!-- Mobile bottom nav -->
   <nav class="mobile-nav">
-    <div class="mnav-item active"><div class="mnav-icon">📋</div>Reservas</div>
-    <div class="mnav-item"><div class="mnav-icon">📊</div>Stats</div>
-    <div class="mnav-item"><div class="mnav-icon">⚙️</div>Config</div>
+    <div class="mnav-item active" data-section="reservas"><div class="mnav-icon">📋</div>Reservas</div>
+    <div class="mnav-item" data-section="estadisticas"><div class="mnav-icon">📊</div>Stats</div>
+    <div class="mnav-item" data-section="configuracion"><div class="mnav-icon">⚙️</div>Config</div>
   </nav>
 </div>
 
-<!-- Toast de nueva reserva -->
+<!-- Toast -->
 <div class="toast" id="toast">
   <div class="toast-title">🍽️ Nueva reserva</div>
   <div class="toast-body" id="toastBody"></div>
 </div>
 
 <script type="module">
-// ══════════════════════════════════════════════════════════════════════════════
-// ⚠️  CAMBIA ESTOS DOS VALORES POR LOS DE TU PROYECTO EN SUPABASE
-//     Supabase → Settings → API → Project URL y anon public key
-// ══════════════════════════════════════════════════════════════════════════════
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+
+// ⚠️ Cambia estos valores por los de tu proyecto Supabase
 const SUPABASE_URL  = 'https://mmfijfnvpmjdvnkbnvqw.supabase.co'
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1tZmlqZm52cG1qZHZua2JudnF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5MDkwNTAsImV4cCI6MjA5NjQ4NTA1MH0.RShJ0ujqYmSmHeG9RNyiwnOy-ijBxMWI8Rb5Hcp21ZE'
-// ══════════════════════════════════════════════════════════════════════════════
 
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+// ⚠️ Credenciales de acceso a Configuración — cámbialas
+const ADMIN_USER = 'admin'
+const ADMIN_PASS = 'taberna2025'
+
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON)
 
-// ── Estado local ──────────────────────────────────────────────────────────────
 let reservas = []
 let currentFilter = 'all'
-const todayStr = new Date().toISOString().split('T')[0]   // "YYYY-MM-DD"
+let currentSection = 'reservas'
+const todayStr = new Date().toISOString().split('T')[0]
 
-// ── Formato de fecha para mostrar ────────────────────────────────────────────
+// ── Defaults de configuración ─────────────────────────────────────────────────
+const configDefaults = {
+  bienvenida: '¡Hola! Soy el asistente de La Taberna del Sur. ¿En qué puedo ayudarte?',
+  apertura1: '13:00', cierre1: '16:00', apertura2: '20:00', cierre2: '23:30',
+  nombre: 'La Taberna del Sur', direccion: 'C/Gran Vía 42, Madrid', telefono: '910123456', maxPersonas: '15'
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
 function formatFecha(fechaStr) {
   if (!fechaStr) return '—'
-  // Añadir T12:00 evita desfases de zona horaria al hacer new Date()
   const d = new Date(fechaStr + 'T12:00:00')
   return d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })
 }
-
-// ── Helpers UI ────────────────────────────────────────────────────────────────
 function estadoBadge(e) {
   const labels = { nueva:'Nueva', pendiente:'Pendiente', confirmada:'Confirmada', cancelada:'Cancelada' }
   return `<span class="badge ${e}">${labels[e] ?? e}</span>`
@@ -657,42 +454,46 @@ function initials(name) {
   return name.split(' ').slice(0,2).map(w => w[0]).join('').toUpperCase()
 }
 function filtered() {
-  if (currentFilter === 'all') return reservas
-  return reservas.filter(r => r.estado === currentFilter)
+  return currentFilter === 'all' ? reservas : reservas.filter(r => r.estado === currentFilter)
 }
+
+// ── Navegación entre secciones ────────────────────────────────────────────────
+function goTo(section) {
+  currentSection = section
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'))
+  document.getElementById('sec-' + section).classList.add('active')
+  document.querySelectorAll('.nav-item[data-section]').forEach(n => n.classList.toggle('active', n.dataset.section === section))
+  document.querySelectorAll('.mnav-item[data-section]').forEach(n => n.classList.toggle('active', n.dataset.section === section))
+  if (section === 'estadisticas') renderStats()
+}
+
+document.querySelectorAll('[data-section]').forEach(el => {
+  el.addEventListener('click', () => goTo(el.dataset.section))
+})
 
 // ── Métricas ──────────────────────────────────────────────────────────────────
 function renderMetrics() {
-  const hoy        = reservas.filter(r => r.fecha === todayStr).length
-  const nuevas     = reservas.filter(r => r.estado === 'nueva').length
-  const confirmadas= reservas.filter(r => r.estado === 'confirmada').length
-  const pendientes = reservas.filter(r => r.estado === 'pendiente').length
-
+  const hoy         = reservas.filter(r => r.fecha === todayStr).length
+  const nuevas      = reservas.filter(r => r.estado === 'nueva').length
+  const confirmadas = reservas.filter(r => r.estado === 'confirmada').length
+  const pendientes  = reservas.filter(r => r.estado === 'pendiente').length
   document.getElementById('metricsRow').innerHTML = `
     <div class="metric"><div class="metric-label">Hoy</div><div class="metric-value gold">${hoy}</div><div class="metric-sub">reservas</div></div>
     <div class="metric"><div class="metric-label">Nuevas</div><div class="metric-value blue">${nuevas}</div><div class="metric-sub">sin gestionar</div></div>
     <div class="metric"><div class="metric-label">Confirmadas</div><div class="metric-value green">${confirmadas}</div><div class="metric-sub">total</div></div>
-    <div class="metric"><div class="metric-label">Pendientes</div><div class="metric-value orange">${pendientes}</div><div class="metric-sub">esperando resp.</div></div>
-  `
+    <div class="metric"><div class="metric-label">Pendientes</div><div class="metric-value orange">${pendientes}</div><div class="metric-sub">esperando resp.</div></div>`
   document.getElementById('mobileMetrics').innerHTML = `
     <div class="mobile-metric"><div class="mobile-metric-label">Hoy</div><div class="mobile-metric-value" style="color:var(--gold)">${hoy}</div></div>
     <div class="mobile-metric"><div class="mobile-metric-label">Nuevas</div><div class="mobile-metric-value" style="color:var(--nueva)">${nuevas}</div></div>
     <div class="mobile-metric"><div class="mobile-metric-label">Confirmadas</div><div class="mobile-metric-value" style="color:var(--confirmada)">${confirmadas}</div></div>
-    <div class="mobile-metric"><div class="mobile-metric-label">Pendientes</div><div class="mobile-metric-value" style="color:var(--pendiente)">${pendientes}</div></div>
-  `
+    <div class="mobile-metric"><div class="mobile-metric-label">Pendientes</div><div class="mobile-metric-value" style="color:var(--pendiente)">${pendientes}</div></div>`
 }
 
-// ── Tabla (desktop) ───────────────────────────────────────────────────────────
+// ── Tabla ─────────────────────────────────────────────────────────────────────
 function renderTable(newId = null) {
   const rows = filtered()
   if (rows.length === 0) {
-    document.getElementById('tableBody').innerHTML = `
-      <tr><td colspan="6">
-        <div class="empty-state">
-          <div class="empty-state-icon">🍽️</div>
-          <div class="empty-state-text">No hay reservas en esta categoría</div>
-        </div>
-      </td></tr>`
+    document.getElementById('tableBody').innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">🍽️</div><div class="empty-state-text">No hay reservas en esta categoría</div></div></td></tr>`
     return
   }
   document.getElementById('tableBody').innerHTML = rows.map(r => `
@@ -702,127 +503,217 @@ function renderTable(newId = null) {
       <td>${formatFecha(r.fecha)}</td>
       <td>${r.hora ?? '—'}</td>
       <td>${estadoBadge(r.estado)}</td>
-      <td>
-        <div class="actions">
-          ${r.estado !== 'confirmada' && r.estado !== 'cancelada'
-            ? `<button class="btn-action" onclick="window.changeEstado('${r.id}','confirmada')">Confirmar</button>` : ''}
-          ${r.estado !== 'cancelada'
-            ? `<button class="btn-action danger" onclick="window.changeEstado('${r.id}','cancelada')">Cancelar</button>` : ''}
-        </div>
-      </td>
-    </tr>
-  `).join('')
+      <td><div class="actions">
+        ${r.estado !== 'confirmada' && r.estado !== 'cancelada' ? `<button class="btn-action" onclick="window.changeEstado('${r.id}','confirmada')">Confirmar</button>` : ''}
+        ${r.estado !== 'cancelada' ? `<button class="btn-action danger" onclick="window.changeEstado('${r.id}','cancelada')">Cancelar</button>` : ''}
+      </div></td>
+    </tr>`).join('')
 }
 
-// ── Cards (mobile) ────────────────────────────────────────────────────────────
 function renderCards() {
   const rows = filtered()
   document.getElementById('cardsList').innerHTML = rows.length === 0
     ? `<div class="empty-state"><div class="empty-state-icon">🍽️</div><div class="empty-state-text">No hay reservas</div></div>`
     : rows.map(r => `
       <div class="card">
-        <div class="card-top">
-          <div class="card-name">${r.nombre ?? '—'}</div>
-          ${estadoBadge(r.estado)}
-        </div>
+        <div class="card-top"><div class="card-name">${r.nombre ?? '—'}</div>${estadoBadge(r.estado)}</div>
         <div class="card-details">
           <div class="card-detail">👥 ${r.personas ?? '—'} personas</div>
           <div class="card-detail">🕐 ${r.hora ?? '—'}</div>
           <div class="card-detail" style="grid-column:span 2">📅 ${formatFecha(r.fecha)}</div>
         </div>
         <div class="card-actions">
-          ${r.estado !== 'confirmada' && r.estado !== 'cancelada'
-            ? `<button class="card-btn" onclick="window.changeEstado('${r.id}','confirmada')">✓ Confirmar</button>` : ''}
-          ${r.estado !== 'cancelada'
-            ? `<button class="card-btn danger" onclick="window.changeEstado('${r.id}','cancelada')">✕ Cancelar</button>` : ''}
+          ${r.estado !== 'confirmada' && r.estado !== 'cancelada' ? `<button class="card-btn" onclick="window.changeEstado('${r.id}','confirmada')">✓ Confirmar</button>` : ''}
+          ${r.estado !== 'cancelada' ? `<button class="card-btn danger" onclick="window.changeEstado('${r.id}','cancelada')">✕ Cancelar</button>` : ''}
         </div>
       </div>`).join('')
 }
 
-function renderAll(newId = null) {
-  renderMetrics()
-  renderTable(newId)
-  renderCards()
+function renderAll(newId = null) { renderMetrics(); renderTable(newId); renderCards(); }
+
+// ── Estadísticas ──────────────────────────────────────────────────────────────
+function renderStats() {
+  const total = reservas.length
+  if (total === 0) {
+    document.getElementById('statsGrid').innerHTML = `<div class="empty-state" style="grid-column:span 2"><div class="empty-state-icon">📊</div><div class="empty-state-text">Aún no hay datos suficientes</div></div>`
+    return
+  }
+
+  // Estados
+  const estados = { nueva:0, pendiente:0, confirmada:0, cancelada:0 }
+  reservas.forEach(r => { if (estados[r.estado] !== undefined) estados[r.estado]++ })
+  const colores = { nueva:'var(--nueva)', pendiente:'var(--pendiente)', confirmada:'var(--confirmada)', cancelada:'var(--cancelada)' }
+  const labels  = { nueva:'Nuevas', pendiente:'Pendientes', confirmada:'Confirmadas', cancelada:'Canceladas' }
+  document.getElementById('statEstados').innerHTML = Object.entries(estados).map(([k,v]) => `
+    <div class="bar-row">
+      <div class="bar-label">${labels[k]}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${total ? (v/total*100).toFixed(1) : 0}%;background:${colores[k]}"></div></div>
+      <div class="bar-val">${v}</div>
+    </div>`).join('')
+
+  // Horas punta
+  const horaCount = {}
+  reservas.forEach(r => { if (r.hora) { const h = r.hora.slice(0,5); horaCount[h] = (horaCount[h]||0)+1 } })
+  const horasOrdenadas = Object.entries(horaCount).sort((a,b) => b[1]-a[1]).slice(0,8)
+  document.getElementById('statHoras').innerHTML = horasOrdenadas.map(([h,v]) => `
+    <div class="hora-cell"><span class="hora-val">${v}</span>${h}</div>`).join('') || '<div style="color:var(--muted);font-size:13px">Sin datos</div>'
+
+  // Tasas
+  const confirmadas = estados.confirmada
+  const canceladas  = estados.cancelada
+  const gestionadas = confirmadas + canceladas
+  const tasaConf = gestionadas ? ((confirmadas/gestionadas)*100).toFixed(0) : '—'
+  const tasaCanc = gestionadas ? ((canceladas/gestionadas)*100).toFixed(0) : '—'
+  const hoySt    = reservas.filter(r => r.fecha === todayStr).length
+  document.getElementById('statTasas').innerHTML = `
+    <div class="tasa-row"><div class="tasa-label">Tasa de confirmación</div><div class="tasa-pct">${tasaConf}${tasaConf !== '—' ? '%' : ''}</div></div>
+    <div class="tasa-row"><div class="tasa-label">Tasa de cancelación</div><div class="tasa-pct">${tasaCanc}${tasaCanc !== '—' ? '%' : ''}</div></div>
+    <div class="tasa-row"><div class="tasa-label">Reservas hoy</div><div class="tasa-pct">${hoySt}</div></div>
+    <div class="tasa-row"><div class="tasa-label">Total histórico</div><div class="tasa-pct">${total}</div></div>`
+
+  // Últimos 7 días
+  const dias7 = []
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i)
+    const str = d.toISOString().split('T')[0]
+    const cnt = reservas.filter(r => r.fecha === str).length
+    dias7.push({ label: d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' }), cnt })
+  }
+  const maxDia = Math.max(...dias7.map(d => d.cnt), 1)
+  document.getElementById('statDias').innerHTML = `<div style="display:flex;gap:8px;align-items:flex-end;height:80px">` +
+    dias7.map(d => `
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px">
+        <div style="font-size:11px;color:var(--muted)">${d.cnt}</div>
+        <div style="width:100%;background:var(--gold);border-radius:4px 4px 0 0;height:${Math.max((d.cnt/maxDia)*60,d.cnt>0?4:0)}px;opacity:${d.cnt>0?1:0.2}"></div>
+        <div style="font-size:10px;color:var(--muted);text-align:center">${d.label}</div>
+      </div>`).join('') + `</div>`
 }
 
-// ── Cambiar estado → Supabase ─────────────────────────────────────────────────
+// ── Configuración — Login ─────────────────────────────────────────────────────
+function checkLogin() {
+  return sessionStorage.getItem('taberna_admin') === '1'
+}
+function showConfigPanel() {
+  document.getElementById('loginOverlay').style.display = 'none'
+  document.getElementById('configPanel').style.display = 'flex'
+  cargarConfigUI()
+}
+function showLoginOverlay() {
+  document.getElementById('loginOverlay').style.display = 'flex'
+  document.getElementById('configPanel').style.display = 'none'
+}
+
+document.getElementById('loginBtn').addEventListener('click', () => {
+  const u = document.getElementById('loginUser').value.trim()
+  const p = document.getElementById('loginPass').value
+  if (u === ADMIN_USER && p === ADMIN_PASS) {
+    sessionStorage.setItem('taberna_admin', '1')
+    document.getElementById('loginError').textContent = ''
+    showConfigPanel()
+  } else {
+    document.getElementById('loginError').textContent = 'Usuario o contraseña incorrectos.'
+  }
+})
+
+document.getElementById('loginPass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('loginBtn').click()
+})
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  sessionStorage.removeItem('taberna_admin')
+  showLoginOverlay()
+})
+
+// Mostrar panel o login al navegar a configuración
+const origGoTo = goTo
+window._goToConfig = () => {
+  if (checkLogin()) showConfigPanel(); else showLoginOverlay()
+}
+
+// Override para configuracion
+document.querySelectorAll('[data-section="configuracion"]').forEach(el => {
+  el.addEventListener('click', () => { window._goToConfig() }, { capture: true })
+})
+
+// ── Configuración — Guardar/Cargar ────────────────────────────────────────────
+function cargarConfigUI() {
+  const cfg = JSON.parse(localStorage.getItem('taberna_config') || '{}')
+  document.getElementById('cfgBienvenida').value = cfg.bienvenida ?? configDefaults.bienvenida
+  document.getElementById('cfgApertura1').value  = cfg.apertura1  ?? configDefaults.apertura1
+  document.getElementById('cfgCierre1').value    = cfg.cierre1    ?? configDefaults.cierre1
+  document.getElementById('cfgApertura2').value  = cfg.apertura2  ?? configDefaults.apertura2
+  document.getElementById('cfgCierre2').value    = cfg.cierre2    ?? configDefaults.cierre2
+  document.getElementById('cfgNombre').value     = cfg.nombre     ?? configDefaults.nombre
+  document.getElementById('cfgDireccion').value  = cfg.direccion  ?? configDefaults.direccion
+  document.getElementById('cfgTelefono').value   = cfg.telefono   ?? configDefaults.telefono
+  document.getElementById('cfgMaxPersonas').value= cfg.maxPersonas?? configDefaults.maxPersonas
+}
+
+window.guardarConfig = (key) => {
+  const cfg = JSON.parse(localStorage.getItem('taberna_config') || '{}')
+  if (key === 'bienvenida') cfg.bienvenida = document.getElementById('cfgBienvenida').value
+  if (key === 'horario') {
+    cfg.apertura1 = document.getElementById('cfgApertura1').value
+    cfg.cierre1   = document.getElementById('cfgCierre1').value
+    cfg.apertura2 = document.getElementById('cfgApertura2').value
+    cfg.cierre2   = document.getElementById('cfgCierre2').value
+  }
+  if (key === 'datos') {
+    cfg.nombre      = document.getElementById('cfgNombre').value
+    cfg.direccion   = document.getElementById('cfgDireccion').value
+    cfg.telefono    = document.getElementById('cfgTelefono').value
+    cfg.maxPersonas = document.getElementById('cfgMaxPersonas').value
+  }
+  localStorage.setItem('taberna_config', JSON.stringify(cfg))
+  const ok = document.getElementById('ok-' + key)
+  ok.classList.add('show')
+  setTimeout(() => ok.classList.remove('show'), 2500)
+}
+
+// ── Cambiar estado ────────────────────────────────────────────────────────────
 window.changeEstado = async (id, newEstado) => {
-  // Actualizar UI instantáneamente (optimistic update)
   reservas = reservas.map(r => r.id === id ? { ...r, estado: newEstado } : r)
   renderAll()
-  // Guardar en Supabase
   const { error } = await supabase.from('reservas').update({ estado: newEstado }).eq('id', id)
-  if (error) {
-    console.error('Error actualizando estado:', error)
-    // Si falla, recargar para volver al estado real
-    await cargarReservas()
-  }
+  if (error) { console.error('Error actualizando estado:', error); await cargarReservas() }
 }
 
 // ── Toast ─────────────────────────────────────────────────────────────────────
 function mostrarToast(reserva) {
   document.getElementById('toastBody').innerHTML =
-    `<strong>${reserva.nombre ?? 'Cliente'}</strong> — ${reserva.personas ?? '?'} personas<br>` +
-    `📅 ${formatFecha(reserva.fecha)} · 🕐 ${reserva.hora ?? '—'}`
+    `<strong>${reserva.nombre ?? 'Cliente'}</strong> — ${reserva.personas ?? '?'} personas<br>📅 ${formatFecha(reserva.fecha)} · 🕐 ${reserva.hora ?? '—'}`
   const toast = document.getElementById('toast')
   toast.classList.add('show')
   setTimeout(() => toast.classList.remove('show'), 4500)
 }
 
-// ── Cargar reservas iniciales ─────────────────────────────────────────────────
+// ── Cargar reservas ───────────────────────────────────────────────────────────
 async function cargarReservas() {
-  const { data, error } = await supabase
-    .from('reservas')
-    .select('*')
-    .order('created_at', { ascending: false })
-
+  const { data, error } = await supabase.from('reservas').select('*').order('created_at', { ascending: false })
   if (error) {
-    console.error('Error cargando reservas:', error)
-    document.getElementById('tableBody').innerHTML =
-      `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--cancelada)">
-        ⚠️ Error al conectar con la base de datos
-      </td></tr>`
+    document.getElementById('tableBody').innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--cancelada)">⚠️ Error al conectar con la base de datos</td></tr>`
     return
   }
   reservas = data ?? []
   renderAll()
 }
 
-// ── Suscripción en tiempo real ────────────────────────────────────────────────
+// ── Realtime ──────────────────────────────────────────────────────────────────
 function suscribirRealtime() {
-  supabase
-    .channel('reservas-live')
-    .on('postgres_changes',
-      { event: 'INSERT', schema: 'public', table: 'reservas' },
-      (payload) => {
-        const nueva = payload.new
-        reservas.unshift(nueva)           // Añadir al principio
-        renderAll(nueva.id)               // Renderizar con highlight
-        mostrarToast(nueva)               // Notificación visual
-      }
-    )
-    .on('postgres_changes',
-      { event: 'UPDATE', schema: 'public', table: 'reservas' },
-      (payload) => {
-        reservas = reservas.map(r => r.id === payload.new.id ? payload.new : r)
-        renderAll()
-      }
-    )
-    .on('postgres_changes',
-      { event: 'DELETE', schema: 'public', table: 'reservas' },
-      (payload) => {
-        reservas = reservas.filter(r => r.id !== payload.old.id)
-        renderAll()
-      }
-    )
+  supabase.channel('reservas-live')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'reservas' }, (payload) => {
+      reservas.unshift(payload.new); renderAll(payload.new.id); mostrarToast(payload.new)
+      if (currentSection === 'estadisticas') renderStats()
+    })
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'reservas' }, (payload) => {
+      reservas = reservas.map(r => r.id === payload.new.id ? payload.new : r); renderAll()
+      if (currentSection === 'estadisticas') renderStats()
+    })
+    .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'reservas' }, (payload) => {
+      reservas = reservas.filter(r => r.id !== payload.old.id); renderAll()
+      if (currentSection === 'estadisticas') renderStats()
+    })
     .subscribe()
-}
-
-// ── Responsive ────────────────────────────────────────────────────────────────
-function applyLayout() {
-  const mobile = window.innerWidth <= 768
-  document.getElementById('mobileMetrics').style.display = mobile ? 'grid' : 'none'
-  document.getElementById('mobileFilter').style.display  = mobile ? 'flex' : 'none'
 }
 
 // ── Filtros ───────────────────────────────────────────────────────────────────
@@ -832,10 +723,16 @@ function setupFilters(containerId) {
       currentFilter = btn.dataset.filter
       document.querySelectorAll('#filterTabs .filter-tab').forEach(b => b.classList.toggle('active', b.dataset.filter === currentFilter))
       document.querySelectorAll('#mobileFilter .mf-tab').forEach(b => b.classList.toggle('active', b.dataset.filter === currentFilter))
-      renderTable()
-      renderCards()
+      renderTable(); renderCards()
     })
   })
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+function applyLayout() {
+  const mobile = window.innerWidth <= 768
+  document.getElementById('mobileMetrics').style.display = mobile ? 'grid' : 'none'
+  document.getElementById('mobileFilter').style.display  = mobile ? 'flex' : 'none'
 }
 
 // ── Arranque ──────────────────────────────────────────────────────────────────
@@ -843,7 +740,6 @@ setupFilters('filterTabs')
 setupFilters('mobileFilter')
 applyLayout()
 window.addEventListener('resize', applyLayout)
-
 await cargarReservas()
 suscribirRealtime()
 </script>
